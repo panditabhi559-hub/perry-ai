@@ -507,6 +507,13 @@ let KEYS = {
   groq:       localStorage.getItem('pk_gr')||'',
   gemini:     localStorage.getItem('pk_gm')||''
 };
+// Refresh keys every time page loads
+function reloadKeys(){
+  KEYS.openrouter=localStorage.getItem('pk_or')||'';
+  KEYS.deepseek=localStorage.getItem('pk_ds')||'';
+  KEYS.groq=localStorage.getItem('pk_gr')||'';
+  KEYS.gemini=localStorage.getItem('pk_gm')||'';
+}
 let curProvIdx = LS('pk_cur',0);
 
 // ════════════════════════════════════════════════════════
@@ -519,12 +526,23 @@ const PROVIDERS = [
     mIdx:0,
     call:async(msgs,sys,key)=>{
       const p=PROVIDERS[0];
-      const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+key,'HTTP-Referer':'https://perry-ai.vercel.app','X-Title':'PerryAI'},
-        body:JSON.stringify({model:p.models[p.mIdx],max_tokens:1400,messages:[{role:'system',content:sys},...msgs]})});
-      const d=await r.json();
-      if(d.error)throw new Error(d.error.message||JSON.stringify(d.error));
-      if(!d.choices?.[0])throw new Error('No response from OpenRouter');
+      let r;
+      try{
+        r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+key,'HTTP-Referer':'https://perry-ai.vercel.app','X-Title':'PerryAI'},
+          body:JSON.stringify({model:p.models[p.mIdx],max_tokens:1400,messages:[{role:'system',content:sys},...msgs]})});
+      }catch(e){throw new Error('CORS: '+e.message);}
+      let d;
+      try{d=await r.json();}catch(e){throw new Error('Invalid response from OpenRouter');}
+      if(d.error){
+        const em=d.error.message||JSON.stringify(d.error);
+        // Try next model
+        if(em.includes('model')||em.includes('429')||em.includes('quota')){
+          if(p.mIdx<p.models.length-1){p.mIdx++;throw new Error('429: model limit');}
+        }
+        throw new Error(em);
+      }
+      if(!d.choices?.[0]?.message?.content)throw new Error('Empty response');
       return d.choices[0].message.content;
     }
   },
@@ -1026,6 +1044,7 @@ function clearChatLogs(){
 // USER APP INIT
 // ════════════════════════════════════════════════════════
 function initUserApp(){
+  reloadKeys(); // Always get fresh keys from localStorage
   userHist=LS('perry_hist_'+curUser.username,[]);
   userMem=LS('perry_mem_'+curUser.username,[]);
   // Set avatar
@@ -1094,7 +1113,15 @@ async function sendMsg(){
     chatMsgs.push({role:'assistant',content:reply});
     renderMsg('ai',reply);
     saveHistMsgs();
-  }catch(e){renderMsg('ai','❌ '+e.message);}
+  }catch(e){
+    let em=e.message||'Unknown error';
+    let hint='';
+    if(em.includes('401')||em.includes('invalid_api_key')||em.includes('Unauthorized'))hint=' ⚠️ API Key galat hai! Setup mein dobara daalo.';
+    else if(em.includes('402')||em.includes('Insufficient'))hint=' ⚠️ Credit khatam!';
+    else if(em.includes('CORS')||em.includes('Failed to fetch'))hint=' ⚠️ Network error — Groq ya Gemini key daalo (sidebar > gear icon)';
+    else if(em.includes('Empty')||em.includes('No response'))hint=' — Retry karo.';
+    renderMsg('ai','❌ '+em+hint);
+  }
   removeTyping(tid);
   generating=false;
   document.getElementById('sendBtn').disabled=false;
@@ -1230,6 +1257,11 @@ function newChat(){
 // KEYS MODAL
 // ════════════════════════════════════════════════════════
 function openKeysModal(){
+  // Always reload from localStorage first
+  KEYS.openrouter=localStorage.getItem('pk_or')||'';
+  KEYS.deepseek=localStorage.getItem('pk_ds')||'';
+  KEYS.groq=localStorage.getItem('pk_gr')||'';
+  KEYS.gemini=localStorage.getItem('pk_gm')||'';
   if(KEYS.openrouter)document.getElementById('kOR').value=KEYS.openrouter;
   if(KEYS.deepseek)document.getElementById('kDS').value=KEYS.deepseek;
   if(KEYS.groq)document.getElementById('kGR').value=KEYS.groq;
