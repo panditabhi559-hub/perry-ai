@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>PerryAI</title>
+<title>PerryAI v1.1</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
@@ -460,6 +460,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
         <div style="font-size:15px;font-weight:700;letter-spacing:-.2px">Perry<span style="color:var(--ac)">AI</span></div>
       </div>
       <div class="top-bar-r">
+        <button class="theme-btn" onclick="openVoiceSettings()" title="Awaaz Settings" style="display:none" id="voiceSettBtn">🔊</button>
         <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" title="Day/Night mode">🌙</button>
         <button class="ib" onclick="newChat()" title="New Chat" style="font-size:16px">✏️</button>
         <div style="position:relative">
@@ -1370,17 +1371,97 @@ function initPerryVoice(){
 function loadBestVoice(){
   const load=()=>{
     const voices=speechSynthesis.getVoices();
-    // Prefer Indian English or Hindi voices
+    // Check if user has saved a preferred voice
+    const savedVoiceName=localStorage.getItem('perry_voice_name');
+    if(savedVoiceName){
+      const found=voices.find(v=>v.name===savedVoiceName);
+      if(found){perryVoice.voiceObj=found;return;}
+    }
+    // Auto-select best Indian voice
     perryVoice.voiceObj=
-      voices.find(v=>v.lang==='en-IN'&&v.name.toLowerCase().includes('female'))||
+      voices.find(v=>v.name==='Google हिन्दी')||
+      voices.find(v=>v.name==='Microsoft Hemant - Hindi (India)')||
+      voices.find(v=>v.name==='Microsoft Kalpana - Hindi (India)')||
+      voices.find(v=>v.lang==='hi-IN')||
+      voices.find(v=>v.lang==='en-IN'&&v.name.toLowerCase().includes('heera'))||
+      voices.find(v=>v.lang==='en-IN'&&v.name.toLowerCase().includes('ravi'))||
       voices.find(v=>v.lang==='en-IN')||
-      voices.find(v=>v.lang.startsWith('en')&&v.name.toLowerCase().includes('zira'))||
       voices.find(v=>v.lang.startsWith('en')&&v.name.toLowerCase().includes('google'))||
       voices.find(v=>v.lang.startsWith('en'))||
       null;
+    // Populate voice selector if open
+    populateVoiceSelect();
   };
   if(speechSynthesis.getVoices().length)load();
   else speechSynthesis.addEventListener('voiceschanged',load);
+}
+
+function populateVoiceSelect(){
+  const sel=document.getElementById('voiceSelectEl');
+  if(!sel)return;
+  const voices=speechSynthesis.getVoices();
+  // Show Indian + Hindi voices first, then all English
+  const indian=voices.filter(v=>v.lang==='hi-IN'||v.lang==='en-IN');
+  const english=voices.filter(v=>v.lang.startsWith('en')&&v.lang!=='en-IN');
+  const others=voices.filter(v=>!v.lang.startsWith('en')&&v.lang!=='hi-IN');
+  sel.innerHTML='<option value="">-- Auto select --</option>';
+  if(indian.length){
+    const g=document.createElement('optgroup');g.label='🇮🇳 Indian Voices';
+    indian.forEach(v=>{const o=document.createElement('option');o.value=v.name;o.textContent=v.name+' ('+v.lang+')';if(perryVoice.voiceObj&&v.name===perryVoice.voiceObj.name)o.selected=true;g.appendChild(o);});
+    sel.appendChild(g);
+  }
+  if(english.length){
+    const g=document.createElement('optgroup');g.label='🌍 English Voices';
+    english.slice(0,15).forEach(v=>{const o=document.createElement('option');o.value=v.name;o.textContent=v.name+' ('+v.lang+')';if(perryVoice.voiceObj&&v.name===perryVoice.voiceObj.name)o.selected=true;g.appendChild(o);});
+    sel.appendChild(g);
+  }
+}
+
+function openVoiceSettings(){
+  populateVoiceSelect();
+  const savedRate=localStorage.getItem('perry_voice_rate')||'1.0';
+  const savedPitch=localStorage.getItem('perry_voice_pitch')||'1.0';
+  document.getElementById('voiceRate').value=savedRate;
+  document.getElementById('voicePitch').value=savedPitch;
+  document.getElementById('rateVal').textContent=savedRate+'x';
+  document.getElementById('pitchVal').textContent=savedPitch;
+  document.getElementById('voiceSettingsModal').style.display='flex';
+}
+function closeVoiceSettings(){
+  document.getElementById('voiceSettingsModal').style.display='none';
+}
+function testVoice(){
+  const sel=document.getElementById('voiceSelectEl');
+  const name=sel.value;
+  const voices=speechSynthesis.getVoices();
+  const v=name?voices.find(x=>x.name===name):perryVoice.voiceObj;
+  if(!v){showToast('❌ Koi voice nahi mili!');return;}
+  const utt=new SpeechSynthesisUtterance('Namaste! Main Perry hun, aapka personal AI assistant.');
+  utt.voice=v;utt.rate=parseFloat(document.getElementById('voiceRate').value);
+  utt.pitch=parseFloat(document.getElementById('voicePitch').value);
+  utt.volume=1;
+  speechSynthesis.cancel();
+  speechSynthesis.speak(utt);
+}
+function saveVoiceSettings(){
+  const sel=document.getElementById('voiceSelectEl');
+  const name=sel.value;
+  const rate=parseFloat(document.getElementById('voiceRate').value);
+  const pitch=parseFloat(document.getElementById('voicePitch').value);
+  if(name){
+    const voices=speechSynthesis.getVoices();
+    perryVoice.voiceObj=voices.find(v=>v.name===name)||perryVoice.voiceObj;
+    localStorage.setItem('perry_voice_name',name);
+  } else {
+    localStorage.removeItem('perry_voice_name');
+    loadBestVoice();
+  }
+  localStorage.setItem('perry_voice_rate',rate);
+  localStorage.setItem('perry_voice_pitch',pitch);
+  perryVoice.savedRate=rate;
+  perryVoice.savedPitch=pitch;
+  showToast('✅ Awaaz save ho gayi!');
+  closeVoiceSettings();
 }
 
 // ── Wake Word Listener — Always Running ─────────────────
@@ -1473,7 +1554,9 @@ function perrySpeak(text, onDone){
   // Use Hindi if text has Hindi chars, else English
   utt.lang=/[ऀ-ॿ]/.test(text)?'hi-IN':'en-IN';
   if(perryVoice.voiceObj&&utt.lang.startsWith('en'))utt.voice=perryVoice.voiceObj;
-  utt.rate=1.0;utt.pitch=1.05;utt.volume=1;
+  utt.rate=perryVoice.savedRate||parseFloat(localStorage.getItem('perry_voice_rate')||'1.0');
+  utt.pitch=perryVoice.savedPitch||parseFloat(localStorage.getItem('perry_voice_pitch')||'1.05');
+  utt.volume=1;
   perryVoice.speaking=true;
   utt.onend=()=>{perryVoice.speaking=false;if(onDone)onDone();};
   utt.onerror=()=>{perryVoice.speaking=false;if(onDone)onDone();};
@@ -1487,6 +1570,7 @@ function toggleVoiceMode(){
   perryVoice.enabled=!perryVoice.enabled;
   if(perryVoice.enabled){
     navigator.mediaDevices.getUserMedia({audio:true}).then(()=>{
+      document.getElementById('voiceSettBtn').style.display='flex';
       updateVoiceFab('on');
       perrySpeak('Perry active! Jab bolna ho, sirf mera naam lo.',()=>startWakeListener());
       showToast('🎙️ Perry sun raha hai! "Perry" bolke jagao');
@@ -1646,6 +1730,47 @@ function showToast(m){
   setTimeout(()=>t.classList.remove('show'),3200);
 }
 </script>
+<!-- Voice Settings Modal -->
+<div id="voiceSettingsModal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.7);align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--card);border:1px solid var(--b);border-radius:16px;padding:24px;width:90%;max-width:420px;box-shadow:var(--sh)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div style="font-size:16px;font-weight:700">🎙️ Awaaz Settings</div>
+      <button onclick="closeVoiceSettings()" style="background:none;border:none;color:var(--t2);font-size:20px;cursor:pointer">×</button>
+    </div>
+    <!-- Voice Select -->
+    <div style="margin-bottom:16px">
+      <label style="font-size:12px;color:var(--t2);display:block;margin-bottom:6px">Awaaz chunno</label>
+      <select id="voiceSelectEl" style="width:100%;background:var(--card2);border:1px solid var(--b);border-radius:8px;padding:9px 12px;color:var(--t1);font-size:13px;font-family:var(--font);outline:none"></select>
+    </div>
+    <!-- Rate -->
+    <div style="margin-bottom:14px">
+      <label style="font-size:12px;color:var(--t2);display:flex;justify-content:space-between;margin-bottom:6px">
+        <span>Speed (Raftaar)</span>
+        <span id="rateVal" style="color:var(--ac)">1.0x</span>
+      </label>
+      <input type="range" id="voiceRate" min="0.5" max="2" step="0.1" value="1.0" oninput="document.getElementById('rateVal').textContent=this.value+'x'"
+        style="width:100%;accent-color:var(--ac)">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-top:2px"><span>Dheere</span><span>Teez</span></div>
+    </div>
+    <!-- Pitch -->
+    <div style="margin-bottom:20px">
+      <label style="font-size:12px;color:var(--t2);display:flex;justify-content:space-between;margin-bottom:6px">
+        <span>Pitch (Sur)</span>
+        <span id="pitchVal" style="color:var(--ac)">1.0</span>
+      </label>
+      <input type="range" id="voicePitch" min="0.5" max="2" step="0.1" value="1.0" oninput="document.getElementById('pitchVal').textContent=this.value"
+        style="width:100%;accent-color:var(--ac)">
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-top:2px"><span>Moti (Deep)</span><span>Patli (High)</span></div>
+    </div>
+    <!-- Buttons -->
+    <div style="display:flex;gap:8px">
+      <button onclick="testVoice()" style="flex:1;padding:10px;border-radius:9px;background:var(--card2);border:1px solid var(--b);color:var(--t1);font-size:13px;cursor:pointer;font-family:var(--font)">▶ Test Karo</button>
+      <button onclick="saveVoiceSettings()" style="flex:1;padding:10px;border-radius:9px;background:var(--ac);border:none;color:#000;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">✅ Save Karo</button>
+    </div>
+    <p style="font-size:11px;color:var(--t3);margin-top:12px;text-align:center">💡 Indian voices ke liye: Chrome mein Windows Hindi voices best hain</p>
+  </div>
+</div>
+
 <!-- Perry Voice FAB -->
 <button class="voice-fab" id="voiceFab" onclick="toggleVoiceMode()" title="Perry Voice" style="display:none">
   <div class="voice-ring" id="voiceRing"></div>
