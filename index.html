@@ -2,8 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<title>PerryAI v1.1</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="PerryAI">
+<meta name="theme-color" content="#0a0a0a">
+<link rel="manifest" id="pwaManifest">
+<title>PerryAI v1.4</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
@@ -168,7 +174,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 .cm-txt{background:var(--card2);border-radius:10px;padding:9px 12px;font-size:12.5px;line-height:1.65;color:var(--t1);flex:1}
 
 /* ══════ USER APP ══════ */
-#userApp{background:var(--bg);flex-direction:row;overflow:hidden;height:100vh}
+#userApp{background:var(--bg);flex-direction:row;overflow:hidden;height:100vh;height:100dvh}
 
 /* Sidebar */
 .sb{width:262px;background:var(--sb);display:flex;flex-direction:column;border-right:1px solid var(--b);flex-shrink:0;transition:transform .28s cubic-bezier(.4,0,.2,1);height:100%}
@@ -212,7 +218,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 .sb-action:hover{background:var(--card);color:var(--t1)}
 
 /* Main */
-.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;position:relative;height:100%}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;position:relative;height:100%;min-height:0}
 .mob-bar{display:none;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--b);flex-shrink:0}
 /* Top header always visible on desktop */
 .top-bar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:52px;border-bottom:1px solid var(--b);flex-shrink:0;background:rgba(10,10,10,.8);backdrop-filter:blur(12px)}
@@ -314,15 +320,62 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 .sb-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99;backdrop-filter:blur(2px)}
 
 @media(max-width:768px){
-  .sb{position:fixed;top:0;left:0;bottom:0;z-index:100;transform:translateX(-100%)}
-  .sb.open{transform:translateX(0)}
+  /* Sidebar */
+  .sb{position:fixed;top:0;left:0;bottom:0;z-index:200;transform:translateX(-100%);width:280px!important}
+  .sb.open{transform:translateX(0);box-shadow:4px 0 30px rgba(0,0,0,.5)}
   .sb-ov.open{display:block}
   .top-bar .p-name{display:none}
-  .sug-grid{grid-template-columns:1fr}
-  .mrow{padding:12px 10px}
-  .inp-area{padding:8px 8px 12px}
-  .adm-nav{width:170px}
-  .form-row{grid-template-columns:1fr}
+  
+  /* Welcome screen */
+  .sug-grid{grid-template-columns:1fr;gap:8px}
+  .w-title{font-size:22px!important}
+  .w-sub{font-size:13px!important}
+  .welcome{padding:20px 16px 100px!important}
+  
+  /* Messages */
+  .mrow{padding:10px 12px}
+  .mb{font-size:14px!important;padding:11px 14px!important;max-width:88%!important}
+  
+  /* Input area - FIXED for mobile */
+  .inp-area{
+    padding:8px 10px env(safe-area-inset-bottom,10px)!important;
+    position:sticky!important;
+    bottom:0!important;
+    background:var(--bg)!important;
+    border-top:1px solid var(--b)!important;
+    z-index:50!important;
+  }
+  .inp-box{border-radius:14px!important;padding:10px 8px 10px 14px!important}
+  .chat-inp{font-size:16px!important} /* Prevents zoom on iOS */
+  
+  /* Top bar */
+  .top-bar{padding:0 12px!important;height:48px!important}
+  
+  /* Admin */
+  .adm-nav{width:100%!important;flex-direction:row!important;overflow-x:auto!important;border-right:none!important;border-bottom:1px solid var(--b)!important;height:auto!important;padding:8px!important}
+  .adm-panel{flex-direction:column!important}
+  .form-row{grid-template-columns:1fr!important}
+  .adm-content{padding:14px!important}
+  
+  /* Voice FAB */
+  .voice-fab{bottom:80px!important;right:14px!important}
+  
+  /* Profile dropdown */
+  .p-dropdown{right:0!important;left:auto!important}
+  
+  /* Login screen */
+  .ul-wrap{padding:20px 20px!important}
+}
+
+/* Extra small screens */
+@media(max-width:380px){
+  .mb{max-width:95%!important}
+  .top-bar{padding:0 8px!important}
+}
+
+/* iOS safe area */
+@supports(padding-bottom: env(safe-area-inset-bottom)){
+  .inp-area{padding-bottom:calc(10px + env(safe-area-inset-bottom))!important}
 }
 </style>
 </head>
@@ -769,6 +822,29 @@ function showScreen(id){
 // ════════════════════════════════════════════════════════
 // INIT
 // ════════════════════════════════════════════════════════
+// PWA Manifest
+(function setupPWA(){
+  const manifest={
+    name:"PerryAI",short_name:"Perry",
+    description:"Personal AI Assistant",
+    start_url:"/",display:"standalone",
+    background_color:"#0a0a0a",theme_color:"#0a0a0a",
+    orientation:"portrait",
+    icons:[
+      {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2310b981'/><text y='.9em' font-size='70' x='15'>🤖</text></svg>",sizes:"192x192",type:"image/svg+xml"},
+      {src:"data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%2310b981'/><text y='.9em' font-size='70' x='15'>🤖</text></svg>",sizes:"512x512",type:"image/svg+xml"}
+    ]
+  };
+  const blob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const link=document.getElementById('pwaManifest');
+  if(link)link.href=url;
+  // Register service worker for offline
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  }
+})();
+
 (function init(){
   const isAdmin=location.search.includes('admin');
   // Check saved sessions
@@ -817,6 +893,34 @@ function loginUser(user){
   initUserApp();
   showToast('👋 Welcome, '+user.name+'!');
 }
+function openMobileSetup(){
+  // Pre-fill existing keys (masked)
+  const or=localStorage.getItem('pk_or')||'';
+  const gr=localStorage.getItem('pk_gr')||'';
+  const gm=localStorage.getItem('pk_gm')||'';
+  if(or)document.getElementById('ms_or').placeholder='sk-or-... (saved)';
+  if(gr)document.getElementById('ms_gr').placeholder='gsk_... (saved)';
+  if(gm)document.getElementById('ms_gm').placeholder='AIza... (saved)';
+  document.getElementById('mobileSetupModal').style.display='flex';
+}
+function closeMobileSetup(){
+  document.getElementById('mobileSetupModal').style.display='none';
+}
+function saveMobileKeys(){
+  const or=document.getElementById('ms_or').value.trim();
+  const gr=document.getElementById('ms_gr').value.trim();
+  const gm=document.getElementById('ms_gm').value.trim();
+  let saved=[];
+  if(or){localStorage.setItem('pk_or',or);KEYS.openrouter=or;saved.push('OpenRouter');}
+  if(gr){localStorage.setItem('pk_gr',gr);KEYS.groq=gr;saved.push('Groq');}
+  if(gm){localStorage.setItem('pk_gm',gm);KEYS.gemini=gm;saved.push('Gemini');}
+  if(!saved.length&&!localStorage.getItem('pk_or')&&!localStorage.getItem('pk_gr')&&!localStorage.getItem('pk_gm')){
+    showToast('❌ Koi key nahi daali!');return;
+  }
+  showToast('✅ Keys save! Ab login karo aur chat karo!');
+  closeMobileSetup();
+}
+
 function toggleTheme(){
   document.body.classList.toggle('light');
   const isLight=document.body.classList.contains('light');
@@ -1334,12 +1438,101 @@ function showTyping(){
 function removeTyping(id){document.getElementById(id)?.remove();}
 function copyMsg(id){navigator.clipboard.writeText(document.getElementById(id)?.innerText||'');showToast('📋 Copied!');}
 let ttsU=null;
+let ttsBtn=null; // track which button is speaking
+
 function speakMsg(id){
-  const txt=document.getElementById(id)?.innerText||'';
-  if(ttsU&&speechSynthesis.speaking)speechSynthesis.cancel();
-  ttsU=new SpeechSynthesisUtterance(txt);
-  ttsU.lang=isHindi(txt)?'hi-IN':'en-IN';ttsU.rate=.95;
-  speechSynthesis.speak(ttsU);
+  const el=document.getElementById(id);
+  if(!el)return;
+  
+  // Toggle - if already speaking this msg, stop
+  if(ttsU&&speechSynthesis.speaking&&ttsBtn===id){
+    speechSynthesis.cancel();
+    resetSpeakBtn(id);
+    return;
+  }
+  
+  // Cancel any ongoing speech
+  if(speechSynthesis.speaking)speechSynthesis.cancel();
+  
+  // Clean text - remove markdown, asterisks, etc
+  let txt=el.innerText||'';
+  txt=txt.replace(/Copy|Suno/g,'').trim(); // remove button text
+  txt=txt.replace(/[*_#~`]/g,'');
+  txt=txt.replace(/https?:\/\/\S+/g,'link'); // replace URLs
+  txt=txt.replace(/\s+/g,' ').trim();
+  if(!txt)return;
+  
+  // Split into chunks (browser TTS cuts off after ~200 chars sometimes)
+  speakChunks(txt.match(/.{1,200}(?:\s|$)/g)||[txt], id);
+}
+
+function speakChunks(chunks, id, idx=0){
+  if(idx>=chunks.length){resetSpeakBtn(id);return;}
+  
+  ttsBtn=id;
+  setSpeakBtn(id, true);
+  
+  ttsU=new SpeechSynthesisUtterance(chunks[idx]);
+  
+  // Language detection
+  const isHindiText=isHindi(chunks[idx]);
+  ttsU.lang=isHindiText?'hi-IN':'en-IN';
+  
+  // Use best available voice
+  const voices=speechSynthesis.getVoices();
+  const savedName=localStorage.getItem('perry_voice_name');
+  
+  let voice=null;
+  if(savedName)voice=voices.find(v=>v.name===savedName);
+  
+  if(!voice){
+    if(isHindiText){
+      voice=voices.find(v=>v.name==='Google हिन्दी')||
+            voices.find(v=>v.name.includes('Hemant'))||
+            voices.find(v=>v.name.includes('Kalpana'))||
+            voices.find(v=>v.lang==='hi-IN')||
+            voices.find(v=>v.lang==='en-IN');
+    } else {
+      voice=voices.find(v=>v.name.includes('Google UK English Female'))||
+            voices.find(v=>v.name.includes('Google UK English Male'))||
+            voices.find(v=>v.name.includes('Google US English'))||
+            voices.find(v=>v.name==='Microsoft Heera - English (India)')||
+            voices.find(v=>v.lang==='en-IN')||
+            voices.find(v=>v.name.toLowerCase().includes('google')&&v.lang.startsWith('en'))||
+            voices.find(v=>v.lang.startsWith('en'));
+    }
+  }
+  
+  if(voice)ttsU.voice=voice;
+  ttsU.rate=parseFloat(localStorage.getItem('perry_voice_rate')||'0.95');
+  ttsU.pitch=parseFloat(localStorage.getItem('perry_voice_pitch')||'1.0');
+  ttsU.volume=1;
+  
+  ttsU.onend=()=>speakChunks(chunks,id,idx+1);
+  ttsU.onerror=()=>resetSpeakBtn(id);
+  
+  // Chrome bug fix - needs small delay
+  setTimeout(()=>speechSynthesis.speak(ttsU), 50);
+}
+
+function setSpeakBtn(id, speaking){
+  // Find the suno button near this message
+  const el=document.getElementById(id);
+  if(!el)return;
+  const btns=el.parentElement?.querySelectorAll('.mact');
+  if(btns){
+    btns.forEach(b=>{
+      if(b.textContent.includes('Suno')||b.textContent.includes('⏹')){
+        b.textContent=speaking?'⏹ Band karo':'🔊 Suno';
+        b.style.color=speaking?'var(--red)':'';
+      }
+    });
+  }
+}
+
+function resetSpeakBtn(id){
+  ttsBtn=null;
+  setSpeakBtn(id, false);
 }
 
 // ════════════════════════════════════════════════════════
@@ -1354,7 +1547,7 @@ let perryVoice = {
   awake: false,         // perry is listening for command
   enabled: false,       // voice mode on/off
   autoSpeak: false,     // auto-speak AI replies
-  wakeWords: ['perry','hey perry','hi perry','ok perry','aye perry','haye perry'],
+  wakeWords: ['perry','hey perry','hi perry','ok perry','aye perry','haye perry','peri','hay perry','o perry','are perry','arey perry'],
   voiceObj: null,       // selected TTS voice
   wakeTimeout: null,    // sleep after 10s of no input
 };
@@ -1475,10 +1668,16 @@ function startWakeListener(){
 
   perryVoice.wakeRec.onresult=e=>{
     if(perryVoice.awake||perryVoice.speaking)return;
-    const heard=Array.from(e.results).map(r=>r[0].transcript.toLowerCase().trim()).join(' ');
+    // Check ALL results including interim
+    let heard='';
+    for(let i=0;i<e.results.length;i++){
+      heard+=e.results[i][0].transcript.toLowerCase()+' ';
+    }
+    heard=heard.trim();
+    console.log('Heard:',heard); // debug
     const triggered=perryVoice.wakeWords.some(w=>heard.includes(w));
     if(triggered){
-      perryVoice.wakeRec.stop();
+      try{perryVoice.wakeRec.stop();}catch(e){}
       wakeUp();
     }
   };
@@ -1526,13 +1725,14 @@ function startCommandListener(){
     autoResize(document.getElementById('chatInp'));
   };
   perryVoice.chatRec.onend=()=>{
-    if(finalText.length>1){
+    clearTimeout(perryVoice.wakeTimeout);
+    if(finalText.length>2){
       perryVoice.awake=false;
       updateVoiceFab('thinking');
-      clearTimeout(perryVoice.wakeTimeout);
       sendVoiceMessage(finalText);
     } else {
-      sleepPerry();
+      // Nothing heard - ask again once
+      perrySpeak('Kuch sunai nahi diya, dobara boliye!',()=>startCommandListener());
     }
   };
   perryVoice.chatRec.onerror=()=>sleepPerry();
@@ -1730,6 +1930,31 @@ function showToast(m){
   setTimeout(()=>t.classList.remove('show'),3200);
 }
 </script>
+<!-- Mobile API Keys Setup Modal -->
+<div id="mobileSetupModal" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.85);align-items:center;justify-content:center;backdrop-filter:blur(4px)">
+  <div style="background:var(--card);border:1px solid var(--b);border-radius:16px;padding:24px;width:92%;max-width:400px;box-shadow:var(--sh)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div style="font-size:16px;font-weight:700">🔑 API Keys Setup</div>
+      <button onclick="closeMobileSetup()" style="background:none;border:none;color:var(--t2);font-size:22px;cursor:pointer;line-height:1">×</button>
+    </div>
+    <p style="font-size:12px;color:var(--t2);margin-bottom:16px">Ek ya zyada keys daalo — Perry automatically best use karega</p>
+    <div style="margin-bottom:10px">
+      <label style="font-size:11px;color:var(--t3);display:block;margin-bottom:4px">⚡ OpenRouter (Free AI)</label>
+      <input id="ms_or" type="password" placeholder="sk-or-v1-..." style="width:100%;background:var(--card2);border:1px solid var(--b);border-radius:8px;padding:10px 12px;color:var(--t1);font-size:13px;font-family:var(--font);outline:none">
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:11px;color:var(--t3);display:block;margin-bottom:4px">⚡ Groq (Super Fast Free)</label>
+      <input id="ms_gr" type="password" placeholder="gsk_..." style="width:100%;background:var(--card2);border:1px solid var(--b);border-radius:8px;padding:10px 12px;color:var(--t1);font-size:13px;font-family:var(--font);outline:none">
+    </div>
+    <div style="margin-bottom:10px">
+      <label style="font-size:11px;color:var(--t3);display:block;margin-bottom:4px">✨ Gemini (Google Free)</label>
+      <input id="ms_gm" type="password" placeholder="AIza..." style="width:100%;background:var(--card2);border:1px solid var(--b);border-radius:8px;padding:10px 12px;color:var(--t1);font-size:13px;font-family:var(--font);outline:none">
+    </div>
+    <button onclick="saveMobileKeys()" style="width:100%;padding:12px;border-radius:10px;background:var(--ac);border:none;color:#000;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);margin-top:6px">✅ Save & Activate</button>
+    <p style="font-size:10px;color:var(--t3);margin-top:10px;text-align:center">Keys sirf is device ke browser mein save hongi</p>
+  </div>
+</div>
+
 <!-- Voice Settings Modal -->
 <div id="voiceSettingsModal" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.7);align-items:center;justify-content:center;backdrop-filter:blur(4px)">
   <div style="background:var(--card);border:1px solid var(--b);border-radius:16px;padding:24px;width:90%;max-width:420px;box-shadow:var(--sh)">
