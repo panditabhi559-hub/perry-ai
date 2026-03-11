@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="PerryAI">
 <meta name="theme-color" content="#0a0a0a">
 <link rel="manifest" id="pwaManifest">
-<title>PerryAI v2.2</title>
+<title>PerryAI v2.3</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
@@ -65,8 +65,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 .link-txt span{color:var(--ac);font-weight:500}
 .login-foot{text-align:center;font-size:11px;color:var(--t3);margin-top:20px;line-height:1.8}
 #gBtnWrap{display:flex;justify-content:center;min-height:44px;margin-bottom:4px}
-.admin-link{position:fixed;bottom:20px;right:20px;font-size:11px;color:var(--t3);cursor:pointer;transition:color .2s}
-.admin-link:hover{color:var(--t2)}
+.admin-link{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));right:16px;font-size:12px;font-weight:500;color:var(--t2);cursor:pointer;transition:all .2s;background:var(--card);border:1px solid var(--b);padding:8px 14px;border-radius:20px;z-index:50;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.admin-link:hover{color:var(--t1);border-color:var(--t2)}
 
 /* ══════ ADMIN LOGIN ══════ */
 #adminLogin{background:radial-gradient(ellipse at 50% 0%,rgba(255,71,87,.08) 0%,transparent 60%),#080808}
@@ -80,98 +80,114 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 .back-link:hover{color:var(--t2)}
 
 /* ══════ ADMIN PANEL ══════ */
-#adminPanel{background:var(--bg);flex-direction:column;overflow:hidden}
-.adm-hdr{background:var(--sb);border-bottom:1px solid var(--b);padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+#adminPanel{background:var(--bg);flex-direction:column}
+.adm-hdr{background:var(--sb);border-bottom:1px solid var(--b);padding:0 20px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .adm-hdr-l{display:flex;align-items:center;gap:10px}
-.adm-badge{background:rgba(255,71,87,.12);border:1px solid rgba(255,71,87,.2);color:var(--red);padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.6px}
+.adm-badge{background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3);padding:3px 10px;border-radius:20px;font-size:10.5px;font-weight:700;letter-spacing:.5px}
 .adm-hdr-r{display:flex;align-items:center;gap:8px}
-.hdr-btn{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);border:none;transition:all .15s}
-.hdr-btn.ghost{background:transparent;color:var(--t2);border:1px solid var(--b)}
-.hdr-btn.ghost:hover{background:var(--card);color:var(--t1)}
-.hdr-btn.danger{background:rgba(255,71,87,.1);color:var(--red);border:1px solid rgba(255,71,87,.2)}
-.hdr-btn.danger:hover{background:var(--red);color:#fff}
-.adm-body{display:flex;flex:1;overflow:hidden}
-.adm-nav{width:200px;background:var(--sb);border-right:1px solid var(--b);padding:12px 8px;display:flex;flex-direction:column;gap:2px;flex-shrink:0}
-.nav-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:9px;cursor:pointer;font-size:13px;color:var(--t2);transition:all .15s;border:none;background:transparent;font-family:var(--font);width:100%;text-align:left}
-.nav-item:hover{background:var(--card);color:var(--t1)}
-.nav-item.active{background:var(--card);color:var(--t1);font-weight:500}
-.nav-item .nav-ic{width:18px;text-align:center;font-size:14px}
-.adm-content{flex:1;overflow-y:auto;padding:20px;scrollbar-width:thin;scrollbar-color:var(--b) transparent}
+.hdr-btn{padding:6px 14px;border-radius:8px;border:1px solid var(--b);background:transparent;color:var(--t2);cursor:pointer;font-size:12.5px;font-family:var(--font);transition:all .15s}
+.hdr-btn:hover{background:var(--card);color:var(--t1)}
+.hdr-btn.danger{color:var(--red);border-color:rgba(239,68,68,.3)}
+.hdr-btn.danger:hover{background:rgba(239,68,68,.1)}
 
-/* Admin Cards */
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
-.stat-card{background:var(--card);border:1px solid var(--b);border-radius:var(--r);padding:18px 16px}
-.stat-val{font-size:28px;font-weight:700;letter-spacing:-.5px;margin-bottom:3px}
-.stat-lbl{font-size:11.5px;color:var(--t2);font-weight:500}
-.stat-trend{font-size:10.5px;margin-top:6px}
-.stat-trend.up{color:var(--ac)}
-.stat-trend.dn{color:var(--red)}
+/* Admin Body */
+.adm-body{display:flex;flex:1;overflow:hidden;min-height:0;position:relative}
+
+/* Sidebar Nav */
+.adm-nav{width:190px;background:var(--sb);border-right:1px solid var(--b);padding:10px 8px;display:flex;flex-direction:column;gap:3px;flex-shrink:0;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:9px;padding:10px 12px;border-radius:10px;border:none;background:transparent;color:var(--t2);cursor:pointer;font-size:13px;font-family:var(--font);transition:all .15s;text-align:left;width:100%}
+.nav-item:hover{background:var(--card);color:var(--t1)}
+.nav-item.active{background:var(--card);color:var(--t1);font-weight:600}
+.nav-item.active .nav-ic{filter:none}
+.nav-ic{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+
+/* Content Area */
+.adm-content{flex:1;overflow-y:auto;padding:22px;scrollbar-width:thin;scrollbar-color:var(--b) transparent}
+
+/* Stat Cards */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.stat-card{background:var(--card);border:1px solid var(--b);border-radius:14px;padding:18px;transition:all .2s}
+.stat-card:hover{border-color:var(--b2);transform:translateY(-2px)}
+.stat-val{font-size:28px;font-weight:700;letter-spacing:-.5px;margin-bottom:4px}
+.stat-lbl{font-size:12px;font-weight:600;color:var(--t2);margin-bottom:4px}
+.stat-trend{font-size:11px;color:var(--t3)}
 
 /* Section */
-.sec{background:var(--card);border:1px solid var(--b);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
-.sec-hdr{padding:14px 18px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between}
-.sec-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px}
-.sec-body{padding:16px 18px}
+.sec{background:var(--card);border:1px solid var(--b);border-radius:14px;overflow:hidden;margin-bottom:14px}
+.sec-hdr{padding:14px 16px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between}
+.sec-title{font-size:13.5px;font-weight:600;color:var(--t1)}
+.sec-body{padding:14px 16px}
+.sec-btn{background:var(--card2)!important;font-size:11.5px!important;padding:5px 12px!important}
 
 /* Table */
-.tbl{width:100%;border-collapse:collapse}
-.tbl th{font-size:10px;color:var(--t3);text-align:left;padding:6px 10px;border-bottom:1px solid var(--b);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
-.tbl td{font-size:12.5px;padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
-.tbl tr:last-child td{border:none}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th{text-align:left;padding:10px 12px;color:var(--t3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.4px;border-bottom:1px solid var(--b);background:var(--card2)}
+.tbl td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--t1);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
 .tbl tr:hover td{background:rgba(255,255,255,.02)}
-.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:600}
-.b-admin{background:rgba(255,71,87,.12);color:var(--red)}
-.b-user{background:rgba(108,92,231,.12);color:#a78bfa}
-.b-on{background:rgba(0,200,150,.12);color:var(--ac)}
-.b-off{background:rgba(255,255,255,.06);color:var(--t3)}
-.tbl-btn{padding:3px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:none;font-family:var(--font);font-weight:500;transition:all .15s}
-.tbl-btn.view{background:var(--card2);color:var(--t2)}
-.tbl-btn.view:hover{color:var(--t1)}
-.tbl-btn.del{background:rgba(255,71,87,.1);color:var(--red)}
-.tbl-btn.del:hover{background:var(--red);color:#fff}
+.tbl-btn{padding:4px 10px;border-radius:6px;border:1px solid var(--b);background:transparent;color:var(--t2);cursor:pointer;font-size:11px;font-family:var(--font);transition:all .15s}
+.tbl-btn.view{color:var(--ac);border-color:rgba(16,185,129,.3)}
+.tbl-btn.view:hover{background:rgba(16,185,129,.1)}
+.tbl-btn.del{color:var(--red);border-color:rgba(239,68,68,.3)}
+.tbl-btn.del:hover{background:rgba(239,68,68,.1)}
 
 /* AI Status */
-.ai-prov-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04)}
-.ai-prov-row:last-child{border:none}
-.ai-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.ai-dot.active{background:var(--ac);box-shadow:0 0 8px rgba(0,200,150,.5);animation:pulse 2s infinite}
-.ai-dot.ready{background:var(--b2)}
-.ai-dot.none{background:var(--t4)}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.ai-log{background:var(--card2);border-radius:8px;padding:12px;font-family:var(--mono);font-size:11px;color:var(--t2);line-height:2;max-height:180px;overflow-y:auto}
+.ai-prov-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.ai-prov-row:last-child{border-bottom:none}
+.ai-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.ai-dot.active{background:#10b981;box-shadow:0 0 8px #10b981}
+.ai-dot.ready{background:#f59e0b}
+.ai-dot.none{background:var(--t3)}
+.ai-log{font-size:12px;color:var(--t2);line-height:1.9;max-height:200px;overflow-y:auto;font-family:var(--mono)}
+
+/* Badge */
+.badge{padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
+.b-on{background:rgba(16,185,129,.15);color:#10b981;border:1px solid rgba(16,185,129,.3)}
+.b-off{background:rgba(90,90,90,.15);color:var(--t2);border:1px solid var(--b)}
+.b-user{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.25)}
 
 /* Toggle */
-.toggle{width:40px;height:22px;background:var(--b2);border-radius:11px;cursor:pointer;position:relative;transition:background .2s;border:none;flex-shrink:0}
-.toggle.on{background:var(--ac)}
-.toggle::after{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
-.toggle.on::after{left:21px}
+.tog-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.tog-row:last-child{border-bottom:none}
+.tog{width:42px;height:24px;border-radius:12px;border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.tog.on{background:var(--ac)}
+.tog.off{background:var(--b2)}
+.tog::after{content:'';position:absolute;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s}
+.tog.on::after{left:21px}
+.tog.off::after{left:3px}
+.set-lbl{font-size:13px;font-weight:500;color:var(--t1)}
+.set-sub{font-size:11.5px;color:var(--t2);margin-top:2px}
 
 /* Form */
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
-.a-inp{width:100%;background:var(--card2);border:1px solid var(--b);border-radius:8px;padding:9px 12px;color:var(--t1);font-size:13px;outline:none;font-family:var(--font);transition:border-color .2s}
+.a-inp{background:var(--card2);border:1px solid var(--b);border-radius:9px;padding:10px 13px;color:var(--t1);font-size:13px;font-family:var(--font);outline:none;width:100%;transition:border-color .15s;box-sizing:border-box}
 .a-inp:focus{border-color:var(--ac)}
-.a-inp::placeholder{color:var(--t3)}
-.a-btn{padding:9px 18px;border-radius:8px;background:var(--ac);border:none;color:#0f0f0f;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .15s}
+.a-btn{padding:9px 18px;border-radius:9px;border:none;background:var(--ac);color:#000;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .15s}
 .a-btn:hover{background:var(--ac2)}
-.a-btn.sec-btn{background:var(--card2);color:var(--t2);border:1px solid var(--b)}
-.a-btn.sec-btn:hover{color:var(--t1)}
-.set-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.04)}
-.set-row:last-child{border:none}
-.set-info{flex:1;min-width:0;margin-right:16px}
-.set-lbl{font-size:13px;font-weight:500}
-.set-sub{font-size:11px;color:var(--t2);margin-top:2px}
 
 /* Chat History Modal */
-.chat-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
-.chat-modal.open{display:flex}
-.cm-box{background:var(--card);border:1px solid var(--b);border-radius:16px;width:100%;max-width:560px;max-height:75vh;display:flex;flex-direction:column;animation:fadeUp .25s ease}
-.cm-hdr{padding:16px 20px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.cm-body{overflow-y:auto;padding:16px 20px;scrollbar-width:thin;scrollbar-color:var(--b) transparent}
-.cm-msg{margin-bottom:12px;display:flex;gap:9px}
-.cm-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:2px;font-weight:600}
-.cm-av.u{background:var(--user);color:#fff}
-.cm-av.a{background:var(--ac);color:#0f0f0f}
-.cm-txt{background:var(--card2);border-radius:10px;padding:9px 12px;font-size:12.5px;line-height:1.65;color:var(--t1);flex:1}
+.ch-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;align-items:center;justify-content:center;padding:20px}
+.ch-modal-bg.open{display:flex}
+.ch-modal{background:var(--card);border:1px solid var(--b);border-radius:16px;width:100%;max-width:600px;max-height:85vh;display:flex;flex-direction:column}
+.ch-modal-hdr{padding:16px 18px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between}
+.ch-modal-body{overflow-y:auto;padding:14px 18px;flex:1}
+
+/* Mobile admin */
+@media(max-width:768px){
+  .adm-body{flex-direction:column!important}
+  .adm-nav{width:100%!important;flex-direction:row!important;overflow-x:auto!important;border-right:none!important;border-bottom:1px solid var(--b)!important;padding:6px 8px!important;height:auto!important;gap:4px!important;flex-shrink:0!important;order:-1}
+  .nav-item{padding:8px 12px!important;font-size:12px!important;white-space:nowrap!important;flex-shrink:0!important;min-width:auto!important}
+  .nav-ic{font-size:15px!important}
+  .adm-content{flex:1!important;overflow-y:auto!important;padding:12px!important;min-height:0!important}
+  .stat-grid{grid-template-columns:repeat(2,1fr)!important;gap:8px!important}
+  .form-row{grid-template-columns:1fr!important}
+  .adm-hdr{padding:0 12px!important;height:48px!important}
+  .hdr-btn{padding:5px 10px!important;font-size:11.5px!important}
+  .tbl{font-size:11px}
+  .tbl th,.tbl td{padding:7px 8px!important}
+  .stat-val{font-size:22px!important}
+  #adminPanel{height:100vh!important;height:100dvh!important}
+}
 
 /* ══════ USER APP ══════ */
 #userApp{background:var(--bg);flex-direction:row;overflow:hidden;height:100vh;height:100dvh}
@@ -472,7 +488,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 <!-- ══════════════════════════════════════ -->
 <div class="screen" id="userLogin">
   <div class="ul-wrap">
-    <div class="ul-logo">
+    <div class="ul-logo" id="logoTap" onclick="handleLogoTap()">
       <div class="ul-logo-ic">🤖</div>
       <div class="ul-logo-txt">Perry<span>AI</span></div>
     </div>
@@ -509,18 +525,26 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
     <div class="al-badge">🔐 ADMIN ACCESS</div>
     <div class="al-title">Admin Login</div>
     <div class="al-sub">Sirf authorized admins ke liye. Sab activities monitored hain.</div>
+    <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--t2);margin-bottom:8px;text-align:left">
+      <strong style="color:var(--ac)">Default credentials:</strong><br>
+      Username: <code style="color:var(--t1)">admin</code> &nbsp;|&nbsp; Password: <code style="color:var(--t1)">admin123</code>
+      <br><span style="font-size:10.5px;color:var(--t3);margin-top:4px;display:block">⚠️ Pehli baar yahi use karo. Baad mein change kar lena.</span>
+    </div>
     <div class="ul-err" id="al-err"></div>
     <input class="inp" id="al-user" placeholder="Admin username" style="margin-bottom:10px"/>
     <input class="inp" id="al-pass" placeholder="Admin password" type="password" style="margin-bottom:14px" onkeydown="if(event.key==='Enter')doAdminLogin()"/>
     <button class="btn-admin" onclick="doAdminLogin()">Admin Panel Kholo →</button>
     <div class="back-link" onclick="showUserLogin()">← User login pe wapas jao</div>
+    <div style="margin-top:10px;text-align:center">
+      <span onclick="resetAdminCreds()" style="font-size:11px;color:var(--t3);cursor:pointer;text-decoration:underline">🔄 Credentials reset karo (default pe wapas)</span>
+    </div>
   </div>
 </div>
 
 <!-- ══════════════════════════════════════ -->
 <!-- ADMIN PANEL -->
 <!-- ══════════════════════════════════════ -->
-<div class="screen" id="adminPanel" style="flex-direction:column;overflow:hidden">
+<div class="screen" id="adminPanel" style="flex-direction:column;overflow:hidden;height:100vh;height:100dvh">
   <div class="adm-hdr">
     <div class="adm-hdr-l">
       <div style="font-size:15px;font-weight:700">Perry<span style="color:var(--red)">AI</span></div>
@@ -1089,8 +1113,29 @@ function showReg(){
 // ════════════════════════════════════════════════════════
 // ADMIN AUTH
 // ════════════════════════════════════════════════════════
+
+// Triple tap on logo = admin login
+let logoTapCount=0, logoTapTimer=null;
+function handleLogoTap(){
+  logoTapCount++;
+  clearTimeout(logoTapTimer);
+  logoTapTimer=setTimeout(()=>{logoTapCount=0;},600);
+  if(logoTapCount>=3){
+    logoTapCount=0;
+    showAdminLogin();
+    showToast('🔐 Admin panel');
+  }
+}
 function showAdminLogin(){showScreen('adminLogin');document.getElementById('al-err').textContent='';}
 function showUserLogin(){showScreen('userLogin');initGoogle();}
+function resetAdminCreds(){
+  localStorage.removeItem('perry_admin');
+  localStorage.removeItem('perry_sess_admin');
+  document.getElementById('al-user').value='admin';
+  document.getElementById('al-pass').value='admin123';
+  document.getElementById('al-err').textContent='';
+  showToast('✅ Reset ho gaya! Username: admin, Password: admin123');
+}
 function doAdminLogin(){
   const u=document.getElementById('al-user').value.trim();
   const p=document.getElementById('al-pass').value.trim();
@@ -1100,7 +1145,7 @@ function doAdminLogin(){
   curAdmin={username:u,name:'Admin'};
   LS_set('perry_sess_admin',curAdmin);
   showScreen('adminPanel');
-  loadAdminNav('dashboard',document.querySelector('.nav-item'));
+  setTimeout(()=>loadAdminNav('dashboard',document.querySelector('.nav-item')),50);
   showToast('✅ Admin Panel mein aagaye!');
 }
 function adminLogout(){
@@ -1126,8 +1171,8 @@ function doChangePass(){
 // ════════════════════════════════════════════════════════
 function aNav(section,btn){
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  loadAdminNav(section,btn);
+  if(btn)btn.classList.add('active');
+  loadAdminNav(section);
 }
 function loadAdminNav(section){
   const cont=document.getElementById('admContent');
