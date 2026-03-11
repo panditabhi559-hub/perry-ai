@@ -31,6 +31,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 
 /* ══════ SCREENS ══════ */
 .screen{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:var(--bg)}
+.screen.active{display:flex!important}
+#userApp.active{display:flex!important;flex-direction:row!important}
 .screen.active{display:flex}
 
 /* ══════ USER LOGIN ══════ */
@@ -757,7 +759,9 @@ function updateAIStatus(name){
 function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.display='none';});
   const sc=document.getElementById(id);
+  if(!sc){console.error('Screen not found:',id);return;}
   sc.style.display='flex';
+  sc.classList.add('active');
   setTimeout(()=>sc.classList.add('active'),10);
 }
 
@@ -1264,8 +1268,7 @@ async function sendMsg(){
     if(perryVoice.enabled){
       setTimeout(()=>{
         // Shorten text for speech (remove markdown)
-        const clean=reply.replace(/[*_#`]/g,'').replace(/
-+/g,' ').substring(0,400);
+        const clean=reply.replace(/[*_#`]/g,'').replace(/\n/g,' ').replace(/  +/g,' ').substring(0,400);
         perrySpeak(clean,()=>{
           if(perryVoice.enabled)startWakeListener();
           updateVoiceFab('on');
@@ -1304,6 +1307,7 @@ function renderMsg(role,text){
     :`${avHtml}<div class="mc"><div class="mb" id="${id}">${fmt(text)}</div><div class="macts"><button class="mact" onclick="copyMsg('${id}')">📋 Copy</button><button class="mact" onclick="speakMsg('${id}')">🔊 Suno</button></div></div>`;
   wrap.appendChild(div);
   const ca=document.getElementById("chatArea");if(ca)ca.scrollTop=ca.scrollHeight;
+  return id;
 }
 
 function fmt(t){
