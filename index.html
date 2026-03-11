@@ -16,6 +16,16 @@
   --user:#7c3aed;--font:'DM Sans',system-ui,sans-serif;--mono:'DM Mono',monospace;
   --r:14px;--sh:0 8px 32px rgba(0,0,0,.5);
 }
+/* Light mode */
+body.light{
+  --bg:#f7f7f8;--sb:#ffffff;--card:#ffffff;--card2:#f0f0f0;--b:#e5e5e5;--b2:#d4d4d4;
+  --t1:#0f0f0f;--t2:#666;--t3:#aaa;--t4:#e0e0e0;
+  --sh:0 4px 20px rgba(0,0,0,.08);
+}
+body.light .mrow.ai .mb{background:#fff;border-color:#e5e5e5}
+body.light .inp-box{background:#fff;border-color:#e5e5e5}
+body.light .top-bar{background:rgba(255,255,255,.9)}
+body.light .sb{border-right-color:#e5e5e5}
 html,body{height:100%;overflow:hidden}
 body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;flex-direction:column}
 
@@ -165,6 +175,22 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 .sb-logo-ic{width:27px;height:27px;background:var(--ac);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px}
 .sb-logo-txt span{color:var(--ac)}
 .ib{width:30px;height:30px;border-radius:7px;background:transparent;border:none;color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:background .15s;flex-shrink:0}
+.theme-btn{width:32px;height:32px;border-radius:8px;background:var(--card);border:1px solid var(--b);color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .2s}
+.theme-btn:hover{background:var(--card2);color:var(--t1)}
+
+/* ── Perry Voice FAB ── */
+.voice-fab{position:fixed;bottom:90px;right:20px;width:52px;height:52px;border-radius:50%;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:22px;z-index:999;background:var(--card);border:2px solid var(--b);box-shadow:var(--sh);transition:all .3s;flex-direction:column}
+.voice-fab:hover{transform:scale(1.08)}
+.voice-fab.vf-on{background:var(--card);border-color:var(--ac);box-shadow:0 0 20px rgba(16,185,129,.2)}
+.voice-fab.vf-awake{background:linear-gradient(135deg,#7c3aed,#6d28d9);border-color:#7c3aed;box-shadow:0 0 25px rgba(124,58,237,.4)}
+.voice-fab.vf-listen{background:linear-gradient(135deg,var(--red),#e11d48);border-color:var(--red);box-shadow:0 0 25px rgba(244,63,94,.4)}
+.voice-fab.vf-think{background:linear-gradient(135deg,var(--ac),#0ea5e9);border-color:var(--ac)}
+.voice-ring{position:absolute;inset:-6px;border-radius:50%;border:2px solid currentColor;opacity:.5;animation:ring-pulse 1.2s infinite;display:none}
+@keyframes ring-pulse{0%{transform:scale(1);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+.voice-fab.vf-awake .voice-ring{color:#7c3aed}
+.voice-fab.vf-listen .voice-ring{color:var(--red)}
+.voice-status{position:fixed;bottom:150px;right:14px;background:var(--card);border:1px solid var(--b);border-radius:10px;padding:6px 12px;font-size:12px;color:var(--t2);display:none;z-index:998;box-shadow:var(--sh);white-space:nowrap}
+.voice-status.show{display:block}
 .ib:hover{background:var(--card)}
 .new-chat-btn{margin:4px 10px 8px;display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:10px;background:transparent;border:1px solid var(--b);color:var(--t1);font-size:13px;cursor:pointer;font-family:var(--font);transition:all .2s;width:calc(100% - 20px);font-weight:500}
 .new-chat-btn:hover{background:var(--card);border-color:var(--ac);color:var(--ac)}
@@ -186,6 +212,23 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 /* Main */
 .main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;position:relative;height:100%}
 .mob-bar{display:none;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--b);flex-shrink:0}
+/* Top header always visible on desktop */
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:52px;border-bottom:1px solid var(--b);flex-shrink:0;background:rgba(10,10,10,.8);backdrop-filter:blur(12px)}
+.top-bar-l{display:flex;align-items:center;gap:10px}
+.top-bar-r{display:flex;align-items:center;gap:8px}
+.profile-btn{display:flex;align-items:center;gap:8px;padding:5px 10px;border-radius:20px;cursor:pointer;transition:background .15s;background:transparent;border:none;font-family:var(--font);color:var(--t1)}
+.profile-btn:hover{background:var(--card)}
+.p-av{width:30px;height:30px;border-radius:50%;background:var(--user);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;overflow:hidden;flex-shrink:0;border:2px solid var(--b2)}
+.p-av img{width:100%;height:100%;object-fit:cover}
+.p-name{font-size:13px;font-weight:500;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.p-dropdown{position:absolute;top:52px;right:12px;background:var(--card);border:1px solid var(--b);border-radius:12px;padding:6px;min-width:180px;z-index:500;box-shadow:var(--sh);animation:fadeUp .15s ease}
+.p-dropdown.hidden{display:none}
+.p-dd-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--t2);transition:all .15s}
+.p-dd-item:hover{background:var(--card2);color:var(--t1)}
+.p-dd-sep{height:1px;background:var(--b);margin:4px 0}
+.p-dd-header{padding:10px 12px 8px;border-bottom:1px solid var(--b);margin-bottom:4px}
+.p-dd-name{font-size:13px;font-weight:600;color:var(--t1)}
+.p-dd-email{font-size:11px;color:var(--t2);margin-top:2px}
 
 /* Chat area */
 .chat-area{flex:1;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:var(--b) transparent;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;height:0;min-height:0}
@@ -272,7 +315,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
   .sb{position:fixed;top:0;left:0;bottom:0;z-index:100;transform:translateX(-100%)}
   .sb.open{transform:translateX(0)}
   .sb-ov.open{display:block}
-  .mob-bar{display:flex}
+  .top-bar .p-name{display:none}
   .sug-grid{grid-template-columns:1fr}
   .mrow{padding:12px 10px}
   .inp-area{padding:8px 8px 12px}
@@ -376,11 +419,30 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
     <div class="sb-lbl">Recents</div>
     <div class="hist" id="hist"></div>
     <div class="sb-bottom">
-      <div class="sb-user">
-        <div class="sb-uav" id="sbUav">U</div>
-        <div style="flex:1;min-width:0">
-          <div class="sb-uname" id="sbUname">User</div>
-          <div class="sb-uinfo" id="sbUinfo">🟢 PerryAI Ready</div>
+      <!-- User info card -->
+      <div style="background:var(--card);border:1px solid var(--b);border-radius:10px;padding:10px 12px;margin-bottom:6px">
+        <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px">
+          <div class="sb-uav" id="sbUav">U</div>
+          <div style="flex:1;min-width:0">
+            <div class="sb-uname" id="sbUname">User</div>
+            <div style="font-size:10.5px;color:var(--t3)" id="sbEmail">—</div>
+          </div>
+        </div>
+        <!-- AI Status - just green dot, no provider name -->
+        <div style="display:flex;align-items:center;gap:6px;padding:6px 9px;background:var(--card2);border-radius:7px">
+          <div style="width:6px;height:6px;border-radius:50%;background:var(--ac);box-shadow:0 0 6px var(--ac)"></div>
+          <span style="font-size:11.5px;color:var(--t2)" id="sbAiModel">PerryAI Ready</span>
+        </div>
+        <!-- Chat count -->
+        <div style="display:flex;gap:8px;margin-top:7px">
+          <div style="flex:1;text-align:center;padding:5px;background:var(--card2);border-radius:6px">
+            <div style="font-size:14px;font-weight:700;color:var(--ac)" id="sbChatCount">0</div>
+            <div style="font-size:10px;color:var(--t3)">Chats</div>
+          </div>
+          <div style="flex:1;text-align:center;padding:5px;background:var(--card2);border-radius:6px">
+            <div style="font-size:14px;font-weight:700;color:var(--blue)" id="sbMsgCount">0</div>
+            <div style="font-size:10px;color:var(--t3)">Messages</div>
+          </div>
         </div>
       </div>
       <div class="sb-action" onclick="userLogout()">⏏️ &nbsp;Logout</div>
@@ -389,10 +451,32 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 
   <!-- Main -->
   <div class="main">
-    <div class="mob-bar">
-      <button class="ib" onclick="openSb()">☰</button>
-      <div style="font-size:14px;font-weight:700">Perry<span style="color:var(--ac)">AI</span></div>
-      <button class="ib" onclick="newChat()">✏️</button>
+    <!-- Top Bar — always visible -->
+    <div class="top-bar" id="topBar">
+      <div class="top-bar-l">
+        <button class="ib" onclick="openSb()" id="sbToggleBtn">☰</button>
+        <div style="font-size:15px;font-weight:700;letter-spacing:-.2px">Perry<span style="color:var(--ac)">AI</span></div>
+      </div>
+      <div class="top-bar-r">
+        <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" title="Day/Night mode">🌙</button>
+        <button class="ib" onclick="newChat()" title="New Chat" style="font-size:16px">✏️</button>
+        <div style="position:relative">
+          <button class="profile-btn" onclick="toggleDropdown()" id="profileBtn">
+            <div class="p-av" id="topAv">U</div>
+            <div class="p-name" id="topName">User</div>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color:var(--t3)"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="p-dropdown hidden" id="profileDropdown">
+            <div class="p-dd-header">
+              <div class="p-dd-name" id="ddName">User</div>
+              <div class="p-dd-email" id="ddEmail">—</div>
+            </div>
+            <div class="p-dd-item" onclick="newChat();toggleDropdown()">✏️ &nbsp;New Chat</div>
+            <div class="p-dd-sep"></div>
+            <div class="p-dd-item" onclick="userLogout()">⏏️ &nbsp;Logout</div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="chat-area" id="chatArea">
       <div class="welcome" id="welcome">
@@ -496,6 +580,8 @@ let userHist = [];
 let userMem = [];
 let generating = false;
 let micOn = false, rec = null;
+// Safe Hindi detection (avoids regex unicode issues)
+function isHindi(t){return t&&t.split('').some(c=>{const n=c.charCodeAt(0);return n>=2304&&n<=2431;});}
 let switchCount = LS('pk_sw',0);
 let aiSwitchLog = LS('pk_log',[]);
 
@@ -659,8 +745,10 @@ function saveGlobalChat(userMsg,aiMsg,provName){
 }
 
 function updateAIStatus(name){
-  document.getElementById('sbUinfo').textContent='🟢 '+name+' connected';
-  document.getElementById('inpHint').textContent='PerryAI • '+name+' • Hindi/Hinglish/English';
+  // Only admin sees provider name - user just sees "Ready"
+  const aiEl=document.getElementById('sbAiModel');
+  if(aiEl)aiEl.textContent='PerryAI Ready';
+  document.getElementById('inpHint').textContent='PerryAI • Hindi/Hinglish/English';
 }
 
 // ════════════════════════════════════════════════════════
@@ -724,6 +812,34 @@ function loginUser(user){
   initUserApp();
   showToast('👋 Welcome, '+user.name+'!');
 }
+function toggleTheme(){
+  document.body.classList.toggle('light');
+  const isLight=document.body.classList.contains('light');
+  localStorage.setItem('perry_theme',isLight?'light':'dark');
+  document.getElementById('themeBtn').textContent=isLight?'☀️':'🌙';
+}
+// Load saved theme
+(function(){
+  if(localStorage.getItem('perry_theme')==='light'){
+    document.body.classList.add('light');
+    setTimeout(()=>{const b=document.getElementById('themeBtn');if(b)b.textContent='☀️';},100);
+  }
+})();
+
+function toggleDropdown(){
+  const dd=document.getElementById('profileDropdown');
+  dd.classList.toggle('hidden');
+  // Close on outside click
+  if(!dd.classList.contains('hidden')){
+    setTimeout(()=>document.addEventListener('click',function h(e){
+      if(!document.getElementById('profileBtn').contains(e.target)){
+        dd.classList.add('hidden');
+        document.removeEventListener('click',h);
+      }
+    }),10);
+  }
+}
+
 function userLogout(){
   if(!confirm('Logout karna chahte ho?'))return;
   curUser=null;localStorage.removeItem('perry_sess_user');
@@ -1047,19 +1163,36 @@ function clearChatLogs(){
 // USER APP INIT
 // ════════════════════════════════════════════════════════
 function initUserApp(){
-  reloadKeys(); // Always get fresh keys from localStorage
+  reloadKeys();
   userHist=LS('perry_hist_'+curUser.username,[]);
   userMem=LS('perry_mem_'+curUser.username,[]);
-  // Set avatar
+  // Sidebar avatar
   const av=document.getElementById('sbUav');
   if(curUser.picture){av.innerHTML=`<img src="${curUser.picture}" onerror="this.parentElement.textContent='${(curUser.name||'U')[0].toUpperCase()}'"/>`;}
   else{av.textContent=(curUser.name||'U')[0].toUpperCase();}
   document.getElementById('sbUname').textContent=curUser.name||curUser.username;
+  document.getElementById('sbEmail').textContent=curUser.email||('@'+curUser.username);
+  // Chat + message counts
+  const myChats=userHist.length;
+  const users=getUsers();
+  const myMsgs=users[curUser.username]?.msgs||0;
+  document.getElementById('sbChatCount').textContent=myChats;
+  document.getElementById('sbMsgCount').textContent=myMsgs;
+  // Top bar avatar + dropdown
+  const topAv=document.getElementById('topAv');
+  if(curUser.picture){topAv.innerHTML=`<img src="${curUser.picture}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.parentElement.textContent='${(curUser.name||'U')[0].toUpperCase()}'"/>`;}
+  else{topAv.textContent=(curUser.name||'U')[0].toUpperCase();}
+  document.getElementById('topName').textContent=curUser.name||curUser.username;
+  document.getElementById('ddName').textContent=curUser.name||curUser.username;
+  document.getElementById('ddEmail').textContent=curUser.email||('@'+curUser.username);
   const prov=getCurProv();
-  document.getElementById('sbUinfo').textContent=prov?'🟢 '+prov.name+' connected':'🔴 Setup keys';
+  const _sm=document.getElementById('sbAiModel');
+  if(_sm)_sm.textContent='PerryAI Ready';
   document.getElementById('inpHint').textContent=prov?'PerryAI • '+prov.name+' • Hindi/Hinglish/English':'PerryAI • Keys setup karo • Hindi/Hinglish/English';
   renderHist();
   // Keys managed by admin only - no modal for users
+  // Init Perry Voice
+  setTimeout(initPerryVoice, 800);
 }
 
 // ════════════════════════════════════════════════════════
@@ -1082,9 +1215,17 @@ function handleGoogle(resp){
     const b64=resp.credential.split('.')[1];
     const pad=b64+'='.repeat((4-b64.length%4)%4);
     const p=JSON.parse(atob(pad.replace(/-/g,'+').replace(/_/g,'/')));
+    // Block temp/disposable email domains
+    const email=p.email||'';
+    const blockedDomains=['tempmail','guerrillamail','mailinator','throwaway','temp-mail','yopmail','sharklasers','guerrillamailblock','trashmail','maildrop','dispostable','fakeinbox','spamgourmet','10minutemail','minutemail'];
+    const emailDomain=email.split('@')[1]||'';
+    if(blockedDomains.some(d=>emailDomain.includes(d))){
+      setUlErr('❌ Temporary email allowed nahi! Apna real Gmail use karo.');
+      return;
+    }
     const uname='g_'+p.sub.substring(0,10);
     const users=getUsers();
-    if(!users[uname])users[uname]={name:p.name,email:p.email,picture:p.picture,username:uname,role:'user',authType:'google',joined:new Date().toLocaleDateString('en-IN'),msgs:0,joinedTs:Date.now()};
+    if(!users[uname])users[uname]={name:p.name,email:email,picture:p.picture,username:uname,role:'user',authType:'google',joined:new Date().toLocaleDateString('en-IN'),msgs:0,joinedTs:Date.now()};
     saveUsers(users);
     loginUser({...users[uname],username:uname});
   }catch(e){setUlErr('❌ Google login error: '+e.message);}
@@ -1117,8 +1258,21 @@ async function sendMsg(){
   try{
     const reply=await smartCall(chatMsgs.slice(-16));
     chatMsgs.push({role:'assistant',content:reply});
-    renderMsg('ai',reply);
+    const msgId=renderMsg('ai',reply);
     saveHistMsgs();
+    // Auto-speak if voice mode active
+    if(perryVoice.enabled){
+      setTimeout(()=>{
+        // Shorten text for speech (remove markdown)
+        const clean=reply.replace(/[*_#`]/g,'').replace(/
++/g,' ').substring(0,400);
+        perrySpeak(clean,()=>{
+          if(perryVoice.enabled)startWakeListener();
+          updateVoiceFab('on');
+        });
+        updateVoiceFab('on');
+      },300);
+    }
   }catch(e){
     let em=e.message||'Unknown error';
     let hint='';
@@ -1179,13 +1333,188 @@ function speakMsg(id){
   const txt=document.getElementById(id)?.innerText||'';
   if(ttsU&&speechSynthesis.speaking)speechSynthesis.cancel();
   ttsU=new SpeechSynthesisUtterance(txt);
-  ttsU.lang=/[\u0900-\u097F]/.test(txt)?'hi-IN':'en-IN';ttsU.rate=.95;
+  ttsU.lang=isHindi(txt)?'hi-IN':'en-IN';ttsU.rate=.95;
   speechSynthesis.speak(ttsU);
 }
 
 // ════════════════════════════════════════════════════════
-// VOICE
+// PERRY VOICE SYSTEM — JARVIS Style
+// Wake words: "perry", "hey perry", "hi perry", "ok perry"
 // ════════════════════════════════════════════════════════
+
+let perryVoice = {
+  wakeRec: null,        // always-on wake word listener
+  chatRec: null,        // active chat listener
+  speaking: false,      // TTS in progress
+  awake: false,         // perry is listening for command
+  enabled: false,       // voice mode on/off
+  autoSpeak: false,     // auto-speak AI replies
+  wakeWords: ['perry','hey perry','hi perry','ok perry','aye perry','haye perry'],
+  voiceObj: null,       // selected TTS voice
+  wakeTimeout: null,    // sleep after 10s of no input
+};
+
+// ── Voice Init ──────────────────────────────────────────
+function initPerryVoice(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){console.log('SR not supported');return;}
+  loadBestVoice();
+  // Show voice FAB button
+  document.getElementById('voiceFab').style.display='flex';
+}
+
+function loadBestVoice(){
+  const load=()=>{
+    const voices=speechSynthesis.getVoices();
+    // Prefer Indian English or Hindi voices
+    perryVoice.voiceObj=
+      voices.find(v=>v.lang==='en-IN'&&v.name.toLowerCase().includes('female'))||
+      voices.find(v=>v.lang==='en-IN')||
+      voices.find(v=>v.lang.startsWith('en')&&v.name.toLowerCase().includes('zira'))||
+      voices.find(v=>v.lang.startsWith('en')&&v.name.toLowerCase().includes('google'))||
+      voices.find(v=>v.lang.startsWith('en'))||
+      null;
+  };
+  if(speechSynthesis.getVoices().length)load();
+  else speechSynthesis.addEventListener('voiceschanged',load);
+}
+
+// ── Wake Word Listener — Always Running ─────────────────
+function startWakeListener(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR||!perryVoice.enabled)return;
+  perryVoice.wakeRec=new SR();
+  perryVoice.wakeRec.lang='hi-IN';
+  perryVoice.wakeRec.continuous=true;
+  perryVoice.wakeRec.interimResults=true;
+
+  perryVoice.wakeRec.onresult=e=>{
+    if(perryVoice.awake||perryVoice.speaking)return;
+    const heard=Array.from(e.results).map(r=>r[0].transcript.toLowerCase().trim()).join(' ');
+    const triggered=perryVoice.wakeWords.some(w=>heard.includes(w));
+    if(triggered){
+      perryVoice.wakeRec.stop();
+      wakeUp();
+    }
+  };
+  perryVoice.wakeRec.onerror=e=>{
+    if(e.error==='not-allowed')return;
+    setTimeout(()=>{if(perryVoice.enabled&&!perryVoice.awake)startWakeListener();},1500);
+  };
+  perryVoice.wakeRec.onend=()=>{
+    setTimeout(()=>{if(perryVoice.enabled&&!perryVoice.awake)startWakeListener();},500);
+  };
+  perryVoice.wakeRec.start();
+}
+
+// ── Wake Up! Perry is listening ─────────────────────────
+function wakeUp(){
+  perryVoice.awake=true;
+  updateVoiceFab('awake');
+  perrySpeak('Haan, boliye!', ()=>startCommandListener());
+  // Auto sleep after 15s
+  clearTimeout(perryVoice.wakeTimeout);
+  perryVoice.wakeTimeout=setTimeout(()=>sleepPerry(),15000);
+}
+
+function sleepPerry(){
+  perryVoice.awake=false;
+  if(perryVoice.chatRec){try{perryVoice.chatRec.stop();}catch(e){}}
+  updateVoiceFab('on');
+  if(perryVoice.enabled)startWakeListener();
+}
+
+// ── Command Listener — After Wake ───────────────────────
+function startCommandListener(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR)return;
+  if(perryVoice.chatRec){try{perryVoice.chatRec.stop();}catch(e){}}
+  perryVoice.chatRec=new SR();
+  perryVoice.chatRec.lang='hi-IN';
+  perryVoice.chatRec.continuous=false;
+  perryVoice.chatRec.interimResults=true;
+
+  let finalText='';
+  perryVoice.chatRec.onresult=e=>{
+    finalText=Array.from(e.results).map(r=>r[0].transcript).join('').trim();
+    document.getElementById('chatInp').value=finalText;
+    autoResize(document.getElementById('chatInp'));
+  };
+  perryVoice.chatRec.onend=()=>{
+    if(finalText.length>1){
+      perryVoice.awake=false;
+      updateVoiceFab('thinking');
+      clearTimeout(perryVoice.wakeTimeout);
+      sendVoiceMessage(finalText);
+    } else {
+      sleepPerry();
+    }
+  };
+  perryVoice.chatRec.onerror=()=>sleepPerry();
+  perryVoice.chatRec.start();
+  updateVoiceFab('listening');
+}
+
+// ── Send message via voice ───────────────────────────────
+async function sendVoiceMessage(text){
+  document.getElementById('chatInp').value=text;
+  await sendMsg();
+  // AI reply auto-speak handled in sendMsg flow
+}
+
+// ── Perry Speaks ─────────────────────────────────────────
+function perrySpeak(text, onDone){
+  if(speechSynthesis.speaking)speechSynthesis.cancel();
+  const utt=new SpeechSynthesisUtterance(text);
+  // Use Hindi if text has Hindi chars, else English
+  utt.lang=/[ऀ-ॿ]/.test(text)?'hi-IN':'en-IN';
+  if(perryVoice.voiceObj&&utt.lang.startsWith('en'))utt.voice=perryVoice.voiceObj;
+  utt.rate=1.0;utt.pitch=1.05;utt.volume=1;
+  perryVoice.speaking=true;
+  utt.onend=()=>{perryVoice.speaking=false;if(onDone)onDone();};
+  utt.onerror=()=>{perryVoice.speaking=false;if(onDone)onDone();};
+  speechSynthesis.speak(utt);
+}
+
+// ── Toggle Voice Mode ────────────────────────────────────
+function toggleVoiceMode(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){showToast('❌ Chrome browser mein use karo!');return;}
+  perryVoice.enabled=!perryVoice.enabled;
+  if(perryVoice.enabled){
+    navigator.mediaDevices.getUserMedia({audio:true}).then(()=>{
+      updateVoiceFab('on');
+      perrySpeak('Perry active! Jab bolna ho, sirf mera naam lo.',()=>startWakeListener());
+      showToast('🎙️ Perry sun raha hai! "Perry" bolke jagao');
+    }).catch(()=>{
+      perryVoice.enabled=false;
+      showToast('❌ Microphone permission do!');
+      updateVoiceFab('off');
+    });
+  } else {
+    if(perryVoice.wakeRec)try{perryVoice.wakeRec.stop();}catch(e){}
+    if(perryVoice.chatRec)try{perryVoice.chatRec.stop();}catch(e){}
+    if(speechSynthesis.speaking)speechSynthesis.cancel();
+    perryVoice.awake=false;
+    updateVoiceFab('off');
+    showToast('🔇 Perry voice band kiya');
+  }
+}
+
+// ── FAB Button States ────────────────────────────────────
+function updateVoiceFab(state){
+  const fab=document.getElementById('voiceFab');
+  const icon=document.getElementById('voiceFabIcon');
+  const ring=document.getElementById('voiceRing');
+  fab.className='voice-fab';
+  if(state==='off'){icon.textContent='🎙️';fab.title='Perry Voice ON karo';}
+  else if(state==='on'){icon.textContent='🎙️';fab.classList.add('vf-on');fab.title='Perry sun raha hai — naam lo!';ring.style.display='none';}
+  else if(state==='awake'){icon.textContent='👂';fab.classList.add('vf-awake');ring.style.display='block';fab.title='Perry jaag gaya — bolo!';}
+  else if(state==='listening'){icon.textContent='🔴';fab.classList.add('vf-listen');ring.style.display='block';fab.title='Bol raha hun...';}
+  else if(state==='thinking'){icon.textContent='⏳';fab.classList.add('vf-think');ring.style.display='none';fab.title='Perry soch raha hai...';}
+}
+
+// ── Old toggleMic (still works for button in chat) ───────
 function toggleMic(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){showToast('❌ Chrome mein use karo!');return;}
@@ -1313,5 +1642,12 @@ function showToast(m){
   setTimeout(()=>t.classList.remove('show'),3200);
 }
 </script>
+<!-- Perry Voice FAB -->
+<button class="voice-fab" id="voiceFab" onclick="toggleVoiceMode()" title="Perry Voice" style="display:none">
+  <div class="voice-ring" id="voiceRing"></div>
+  <span id="voiceFabIcon">🎙️</span>
+</button>
+<div class="voice-status" id="voiceStatus"></div>
+
 </body>
 </html>
