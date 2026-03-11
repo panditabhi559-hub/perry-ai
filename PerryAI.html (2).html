@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>PerryAI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0f0f0f;--sb:#141414;--card:#1a1a1a;--card2:#212121;--b:#2a2a2a;--b2:#333;
+  --t1:#f0f0f0;--t2:#888;--t3:#555;--t4:#3a3a3a;
+  --ac:#00c896;--ac2:#00a87e;--acd:rgba(0,200,150,.1);
+  --red:#ff4757;--yellow:#ffd32a;--blue:#3d9afe;
+  --user:#6c5ce7;--font:'DM Sans',system-ui,sans-serif;--mono:'DM Mono',monospace;
+  --r:12px;--sh:0 4px 24px rgba(0,0,0,.4);
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;flex-direction:column}
+
+/* ══════ SCREENS ══════ */
+.screen{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;background:var(--bg)}
+.screen.active{display:flex}
+
+/* ══════ USER LOGIN ══════ */
+#userLogin{background:radial-gradient(ellipse at 30% 20%,rgba(0,200,150,.06) 0%,transparent 60%),radial-gradient(ellipse at 80% 80%,rgba(108,92,231,.06) 0%,transparent 60%),var(--bg)}
+.ul-wrap{width:100%;max-width:400px;padding:24px;animation:fadeUp .45s cubic-bezier(.22,1,.36,1)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.ul-logo{display:flex;align-items:center;gap:12px;margin-bottom:32px}
+.ul-logo-ic{width:44px;height:44px;background:var(--ac);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 0 30px rgba(0,200,150,.3)}
+.ul-logo-txt{font-size:22px;font-weight:700;letter-spacing:-.3px}
+.ul-logo-txt span{color:var(--ac)}
+.ul-title{font-size:26px;font-weight:700;margin-bottom:6px;letter-spacing:-.4px}
+.ul-sub{font-size:13.5px;color:var(--t2);margin-bottom:28px;line-height:1.6}
+.ul-err{color:var(--red);font-size:12px;margin-bottom:10px;min-height:16px;display:flex;align-items:center;gap:5px}
+.inp{width:100%;background:var(--card);border:1px solid var(--b);border-radius:10px;padding:12px 15px;color:var(--t1);font-size:14px;outline:none;font-family:var(--font);transition:border-color .2s,box-shadow .2s;margin-bottom:10px}
+.inp:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(0,200,150,.1)}
+.inp::placeholder{color:var(--t3)}
+.btn-main{width:100%;padding:13px;border-radius:10px;background:var(--ac);border:none;color:#0f0f0f;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .2s;margin-bottom:8px;letter-spacing:.2px}
+.btn-main:hover{background:var(--ac2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,200,150,.25)}
+.btn-main:active{transform:none}
+.divider{display:flex;align-items:center;gap:12px;margin:16px 0}
+.divider-line{flex:1;height:1px;background:var(--b)}
+.divider-txt{font-size:11px;color:var(--t3);white-space:nowrap}
+.link-txt{font-size:12.5px;color:var(--t2);text-align:center;margin-top:10px;cursor:pointer;line-height:1.8}
+.link-txt span{color:var(--ac);font-weight:500}
+.login-foot{text-align:center;font-size:11px;color:var(--t3);margin-top:20px;line-height:1.8}
+#gBtnWrap{display:flex;justify-content:center;min-height:44px;margin-bottom:4px}
+.admin-link{position:fixed;bottom:20px;right:20px;font-size:11px;color:var(--t3);cursor:pointer;transition:color .2s}
+.admin-link:hover{color:var(--t2)}
+
+/* ══════ ADMIN LOGIN ══════ */
+#adminLogin{background:radial-gradient(ellipse at 50% 0%,rgba(255,71,87,.08) 0%,transparent 60%),#080808}
+.al-wrap{width:100%;max-width:380px;padding:24px;animation:fadeUp .4s ease}
+.al-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,71,87,.12);border:1px solid rgba(255,71,87,.2);color:var(--red);padding:5px 12px;border-radius:20px;font-size:11px;font-weight:600;letter-spacing:.5px;margin-bottom:20px}
+.al-title{font-size:24px;font-weight:700;margin-bottom:5px}
+.al-sub{font-size:13px;color:var(--t2);margin-bottom:24px}
+.btn-admin{width:100%;padding:13px;border-radius:10px;background:var(--red);border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .2s;letter-spacing:.2px}
+.btn-admin:hover{background:#e8394a;transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,71,87,.25)}
+.back-link{font-size:12px;color:var(--t3);text-align:center;margin-top:14px;cursor:pointer;transition:color .2s}
+.back-link:hover{color:var(--t2)}
+
+/* ══════ ADMIN PANEL ══════ */
+#adminPanel{background:var(--bg);flex-direction:column;overflow:hidden}
+.adm-hdr{background:var(--sb);border-bottom:1px solid var(--b);padding:0 20px;height:54px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.adm-hdr-l{display:flex;align-items:center;gap:10px}
+.adm-badge{background:rgba(255,71,87,.12);border:1px solid rgba(255,71,87,.2);color:var(--red);padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.6px}
+.adm-hdr-r{display:flex;align-items:center;gap:8px}
+.hdr-btn{padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);border:none;transition:all .15s}
+.hdr-btn.ghost{background:transparent;color:var(--t2);border:1px solid var(--b)}
+.hdr-btn.ghost:hover{background:var(--card);color:var(--t1)}
+.hdr-btn.danger{background:rgba(255,71,87,.1);color:var(--red);border:1px solid rgba(255,71,87,.2)}
+.hdr-btn.danger:hover{background:var(--red);color:#fff}
+.adm-body{display:flex;flex:1;overflow:hidden}
+.adm-nav{width:200px;background:var(--sb);border-right:1px solid var(--b);padding:12px 8px;display:flex;flex-direction:column;gap:2px;flex-shrink:0}
+.nav-item{display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:9px;cursor:pointer;font-size:13px;color:var(--t2);transition:all .15s;border:none;background:transparent;font-family:var(--font);width:100%;text-align:left}
+.nav-item:hover{background:var(--card);color:var(--t1)}
+.nav-item.active{background:var(--card);color:var(--t1);font-weight:500}
+.nav-item .nav-ic{width:18px;text-align:center;font-size:14px}
+.adm-content{flex:1;overflow-y:auto;padding:20px;scrollbar-width:thin;scrollbar-color:var(--b) transparent}
+
+/* Admin Cards */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:20px}
+.stat-card{background:var(--card);border:1px solid var(--b);border-radius:var(--r);padding:18px 16px}
+.stat-val{font-size:28px;font-weight:700;letter-spacing:-.5px;margin-bottom:3px}
+.stat-lbl{font-size:11.5px;color:var(--t2);font-weight:500}
+.stat-trend{font-size:10.5px;margin-top:6px}
+.stat-trend.up{color:var(--ac)}
+.stat-trend.dn{color:var(--red)}
+
+/* Section */
+.sec{background:var(--card);border:1px solid var(--b);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
+.sec-hdr{padding:14px 18px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between}
+.sec-title{font-size:13px;font-weight:600;display:flex;align-items:center;gap:7px}
+.sec-body{padding:16px 18px}
+
+/* Table */
+.tbl{width:100%;border-collapse:collapse}
+.tbl th{font-size:10px;color:var(--t3);text-align:left;padding:6px 10px;border-bottom:1px solid var(--b);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.tbl td{font-size:12.5px;padding:10px 10px;border-bottom:1px solid rgba(255,255,255,.03);vertical-align:middle}
+.tbl tr:last-child td{border:none}
+.tbl tr:hover td{background:rgba(255,255,255,.02)}
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:10.5px;font-weight:600}
+.b-admin{background:rgba(255,71,87,.12);color:var(--red)}
+.b-user{background:rgba(108,92,231,.12);color:#a78bfa}
+.b-on{background:rgba(0,200,150,.12);color:var(--ac)}
+.b-off{background:rgba(255,255,255,.06);color:var(--t3)}
+.tbl-btn{padding:3px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:none;font-family:var(--font);font-weight:500;transition:all .15s}
+.tbl-btn.view{background:var(--card2);color:var(--t2)}
+.tbl-btn.view:hover{color:var(--t1)}
+.tbl-btn.del{background:rgba(255,71,87,.1);color:var(--red)}
+.tbl-btn.del:hover{background:var(--red);color:#fff}
+
+/* AI Status */
+.ai-prov-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.ai-prov-row:last-child{border:none}
+.ai-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.ai-dot.active{background:var(--ac);box-shadow:0 0 8px rgba(0,200,150,.5);animation:pulse 2s infinite}
+.ai-dot.ready{background:var(--b2)}
+.ai-dot.none{background:var(--t4)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.ai-log{background:var(--card2);border-radius:8px;padding:12px;font-family:var(--mono);font-size:11px;color:var(--t2);line-height:2;max-height:180px;overflow-y:auto}
+
+/* Toggle */
+.toggle{width:40px;height:22px;background:var(--b2);border-radius:11px;cursor:pointer;position:relative;transition:background .2s;border:none;flex-shrink:0}
+.toggle.on{background:var(--ac)}
+.toggle::after{content:'';position:absolute;width:16px;height:16px;background:#fff;border-radius:50%;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.toggle.on::after{left:21px}
+
+/* Form */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.a-inp{width:100%;background:var(--card2);border:1px solid var(--b);border-radius:8px;padding:9px 12px;color:var(--t1);font-size:13px;outline:none;font-family:var(--font);transition:border-color .2s}
+.a-inp:focus{border-color:var(--ac)}
+.a-inp::placeholder{color:var(--t3)}
+.a-btn{padding:9px 18px;border-radius:8px;background:var(--ac);border:none;color:#0f0f0f;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .15s}
+.a-btn:hover{background:var(--ac2)}
+.a-btn.sec-btn{background:var(--card2);color:var(--t2);border:1px solid var(--b)}
+.a-btn.sec-btn:hover{color:var(--t1)}
+.set-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.set-row:last-child{border:none}
+.set-info{flex:1;min-width:0;margin-right:16px}
+.set-lbl{font-size:13px;font-weight:500}
+.set-sub{font-size:11px;color:var(--t2);margin-top:2px}
+
+/* Chat History Modal */
+.chat-modal{position:fixed;inset:0;background:rgba(0,0,0,.8);backdrop-filter:blur(8px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.chat-modal.open{display:flex}
+.cm-box{background:var(--card);border:1px solid var(--b);border-radius:16px;width:100%;max-width:560px;max-height:75vh;display:flex;flex-direction:column;animation:fadeUp .25s ease}
+.cm-hdr{padding:16px 20px;border-bottom:1px solid var(--b);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.cm-body{overflow-y:auto;padding:16px 20px;scrollbar-width:thin;scrollbar-color:var(--b) transparent}
+.cm-msg{margin-bottom:12px;display:flex;gap:9px}
+.cm-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:2px;font-weight:600}
+.cm-av.u{background:var(--user);color:#fff}
+.cm-av.a{background:var(--ac);color:#0f0f0f}
+.cm-txt{background:var(--card2);border-radius:10px;padding:9px 12px;font-size:12.5px;line-height:1.65;color:var(--t1);flex:1}
+
+/* ══════ USER APP ══════ */
+#userApp{background:var(--bg);flex-direction:row;overflow:hidden}
+
+/* Sidebar */
+.sb{width:258px;background:var(--sb);display:flex;flex-direction:column;border-right:1px solid var(--b);flex-shrink:0;transition:transform .25s cubic-bezier(.4,0,.2,1)}
+.sb-top{padding:12px 10px 8px;display:flex;align-items:center;justify-content:space-between}
+.sb-logo{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700}
+.sb-logo-ic{width:27px;height:27px;background:var(--ac);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px}
+.sb-logo-txt span{color:var(--ac)}
+.ib{width:30px;height:30px;border-radius:7px;background:transparent;border:none;color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;transition:background .15s;flex-shrink:0}
+.ib:hover{background:var(--card)}
+.new-chat-btn{margin:4px 10px 8px;display:flex;align-items:center;gap:8px;padding:9px 12px;border-radius:9px;background:transparent;border:1px solid var(--b);color:var(--t1);font-size:13px;cursor:pointer;font-family:var(--font);transition:all .15s;width:calc(100% - 20px)}
+.new-chat-btn:hover{background:var(--card);border-color:var(--b2)}
+.sb-lbl{font-size:10px;color:var(--t3);padding:6px 14px 4px;text-transform:uppercase;letter-spacing:.6px;font-weight:600}
+.hist{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--b) transparent;padding:0 6px}
+.hi{padding:8px 10px;border-radius:8px;cursor:pointer;font-size:12.5px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:all .15s}
+.hi:hover{background:var(--card);color:var(--t1)}
+.hi.active{background:var(--card);color:var(--t1);font-weight:500}
+.sb-bottom{border-top:1px solid var(--b);padding:8px 6px 10px;flex-shrink:0}
+.sb-user{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:9px;cursor:pointer;transition:background .15s}
+.sb-user:hover{background:var(--card)}
+.sb-uav{width:28px;height:28px;border-radius:50%;background:var(--user);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden}
+.sb-uav img{width:100%;height:100%;object-fit:cover}
+.sb-uname{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.sb-uinfo{font-size:10.5px;color:var(--t3);margin-top:1px}
+.sb-action{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:12.5px;color:var(--t2);transition:all .15s}
+.sb-action:hover{background:var(--card);color:var(--t1)}
+
+/* Main */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.mob-bar{display:none;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--b);flex-shrink:0}
+
+/* Chat area */
+.chat-area{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--b) transparent}
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100%;padding:32px 20px;gap:18px;animation:fadeUp .4s ease}
+.w-ic{width:56px;height:56px;background:var(--ac);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:26px;box-shadow:0 0 40px rgba(0,200,150,.2)}
+.w-title{font-size:26px;font-weight:700;letter-spacing:-.4px;text-align:center}
+.w-sub{font-size:14px;color:var(--t2);text-align:center;max-width:380px;line-height:1.7}
+.sug-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;width:100%;max-width:560px}
+.sug{background:var(--card);border:1px solid var(--b);border-radius:11px;padding:13px 15px;cursor:pointer;transition:all .15s;text-align:left}
+.sug:hover{background:var(--card2);border-color:var(--b2);transform:translateY(-1px)}
+.sug-t{font-size:13px;font-weight:600;margin-bottom:3px}
+.sug-s{font-size:11.5px;color:var(--t2);line-height:1.45}
+
+/* Messages */
+.msgs{padding:8px 0 16px}
+.mrow{padding:16px max(16px,calc(50% - 360px));display:flex;gap:11px;animation:fadeUp .2s ease}
+.mrow.user{flex-direction:row-reverse}
+.av{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:2px;overflow:hidden}
+.av.uav{background:var(--user);color:#fff;font-weight:700;font-size:10px}
+.av.aav{background:var(--ac);font-size:14px}
+.av img{width:100%;height:100%;object-fit:cover}
+.mc{max-width:74%;display:flex;flex-direction:column}
+.mrow.user .mc{align-items:flex-end}
+.mrow.ai .mc{align-items:flex-start}
+.mb{padding:11px 15px;border-radius:16px;font-size:13.5px;line-height:1.75;word-break:break-word;max-width:100%}
+.mrow.user .mb{background:var(--user);color:#fff;border-bottom-right-radius:3px}
+.mrow.ai .mb{background:var(--card);border:1px solid var(--b);border-bottom-left-radius:3px}
+.mb strong{font-weight:700}
+.mb em{opacity:.8}
+.mb code{background:rgba(0,0,0,.4);border-radius:5px;padding:1px 6px;font-size:12px;font-family:var(--mono)}
+.mb pre{background:#0a0a0a;border:1px solid var(--b);border-radius:9px;padding:13px;overflow-x:auto;margin:9px 0;font-size:12px;font-family:var(--mono);line-height:1.7}
+.macts{display:flex;gap:3px;margin-top:5px;opacity:0;transition:opacity .2s}
+.mrow:hover .macts{opacity:1}
+.mact{background:none;border:none;color:var(--t3);cursor:pointer;font-size:12px;padding:3px 8px;border-radius:5px;transition:all .15s;font-family:var(--font)}
+.mact:hover{background:var(--card);color:var(--t2)}
+
+/* Typing */
+.typing-row{padding:16px max(16px,calc(50% - 360px));display:flex;gap:11px}
+.tdots{display:flex;gap:4px;align-items:center;padding:11px 15px;background:var(--card);border:1px solid var(--b);border-radius:16px;border-bottom-left-radius:3px}
+.td{width:6px;height:6px;border-radius:50%;background:var(--t3);animation:ta 1.3s infinite}
+.td:nth-child(2){animation-delay:.2s}
+.td:nth-child(3){animation-delay:.4s}
+@keyframes ta{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
+
+/* Input */
+.inp-area{padding:10px max(12px,calc(50% - 380px)) 16px;flex-shrink:0}
+.inp-box{background:var(--card);border:1px solid var(--b);border-radius:14px;display:flex;align-items:flex-end;gap:6px;padding:10px 10px 10px 16px;transition:border-color .2s,box-shadow .2s}
+.inp-box:focus-within{border-color:rgba(0,200,150,.3);box-shadow:0 0 0 3px rgba(0,200,150,.06)}
+.chat-inp{flex:1;background:none;border:none;outline:none;color:var(--t1);font-size:14px;font-family:var(--font);resize:none;max-height:160px;min-height:22px;line-height:1.65;padding:1px 0}
+.chat-inp::placeholder{color:var(--t3)}
+.inp-btns{display:flex;align-items:center;gap:2px;flex-shrink:0}
+.ibt{width:32px;height:32px;border-radius:8px;border:none;background:transparent;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .15s}
+.ibt:hover{background:var(--card2);color:var(--t2)}
+.ibt.mic-on{background:var(--red);color:#fff;animation:mic-pulse .8s infinite}
+@keyframes mic-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,71,87,.4)}50%{box-shadow:0 0 0 8px rgba(255,71,87,0)}}
+.send-btn{width:32px;height:32px;border-radius:8px;border:none;background:var(--ac);color:#0f0f0f;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.send-btn:hover{background:var(--ac2);transform:scale(1.05)}
+.send-btn:disabled{opacity:.3;cursor:not-allowed;transform:none}
+.inp-hint{text-align:center;font-size:10.5px;color:var(--t3);margin-top:7px;letter-spacing:.1px}
+
+/* Keys Modal */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);z-index:300;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--b);border-radius:16px;padding:26px 22px;width:100%;max-width:420px;animation:fadeUp .25s ease}
+.modal-t{font-size:17px;font-weight:700;margin-bottom:5px}
+.modal-s{font-size:12.5px;color:var(--t2);margin-bottom:18px;line-height:1.65}
+.prov-tip{background:rgba(0,200,150,.06);border:1px solid rgba(0,200,150,.15);border-radius:9px;padding:10px 13px;font-size:12px;color:var(--t2);margin-bottom:14px;line-height:1.7}
+.prov-tip a{color:var(--ac);text-decoration:none}
+.minp{width:100%;background:var(--card2);border:1px solid var(--b);border-radius:9px;padding:10px 13px;color:var(--t1);font-size:13px;outline:none;font-family:var(--font);margin-bottom:9px;transition:border-color .2s}
+.minp:focus{border-color:var(--ac)}
+.minp::placeholder{color:var(--t3)}
+.mbtn{width:100%;padding:11px;border-radius:9px;background:var(--ac);border:none;color:#0f0f0f;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .2s}
+.mbtn:hover{background:var(--ac2)}
+.mskip{width:100%;padding:8px;background:transparent;border:none;color:var(--t3);font-size:12px;cursor:pointer;margin-top:5px;font-family:var(--font)}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--card2);border:1px solid var(--b);color:var(--t1);padding:8px 18px;border-radius:30px;font-size:12.5px;opacity:0;transition:all .3s;z-index:9999;pointer-events:none;white-space:nowrap;box-shadow:var(--sh)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* Sb overlay mobile */
+.sb-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:99;backdrop-filter:blur(2px)}
+
+@media(max-width:768px){
+  .sb{position:fixed;top:0;left:0;bottom:0;z-index:100;transform:translateX(-100%)}
+  .sb.open{transform:translateX(0)}
+  .sb-ov.open{display:block}
+  .mob-bar{display:flex}
+  .sug-grid{grid-template-columns:1fr}
+  .mrow{padding:12px 10px}
+  .inp-area{padding:8px 8px 12px}
+  .adm-nav{width:170px}
+  .form-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="sb-ov" id="sbOv" onclick="closeSb()"></div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- USER LOGIN SCREEN -->
+<!-- ══════════════════════════════════════ -->
+<div class="screen" id="userLogin">
+  <div class="ul-wrap">
+    <div class="ul-logo">
+      <div class="ul-logo-ic">🤖</div>
+      <div class="ul-logo-txt">Perry<span>AI</span></div>
+    </div>
+    <div class="ul-title" id="ul-title">Welcome back</div>
+    <div class="ul-sub" id="ul-sub">Login karke Perry se baat karo — India ka smartest AI!</div>
+    <div class="ul-err" id="ul-err"></div>
+    <div id="gBtnWrap"></div>
+    <div class="divider"><div class="divider-line"></div><div class="divider-txt">ya username se</div><div class="divider-line"></div></div>
+    <!-- Login Form -->
+    <div id="ulForm">
+      <input class="inp" id="ul-user" placeholder="Username" autocomplete="username"/>
+      <input class="inp" id="ul-pass" placeholder="Password" type="password" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <button class="btn-main" onclick="doLogin()">Login karo →</button>
+      <div class="link-txt">Pehli baar? <span onclick="showReg()">Free account banao</span></div>
+    </div>
+    <!-- Register Form -->
+    <div id="ulReg" style="display:none">
+      <input class="inp" id="ur-name" placeholder="Apna naam"/>
+      <input class="inp" id="ur-user" placeholder="Username chuno"/>
+      <input class="inp" id="ur-pass" placeholder="Password (4+ characters)" type="password" onkeydown="if(event.key==='Enter')doRegister()"/>
+      <button class="btn-main" onclick="doRegister()">Account banao →</button>
+      <div class="link-txt">Pehle se account hai? <span onclick="showLogin()">Login karo</span></div>
+    </div>
+    <div class="login-foot">PerryAI Labs • Secure & Private</div>
+  </div>
+  <div class="admin-link" onclick="showAdminLogin()">🔐 Admin</div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- ADMIN LOGIN SCREEN -->
+<!-- ══════════════════════════════════════ -->
+<div class="screen" id="adminLogin">
+  <div class="al-wrap">
+    <div class="al-badge">🔐 ADMIN ACCESS</div>
+    <div class="al-title">Admin Login</div>
+    <div class="al-sub">Sirf authorized admins ke liye. Sab activities monitored hain.</div>
+    <div class="ul-err" id="al-err"></div>
+    <input class="inp" id="al-user" placeholder="Admin username" style="margin-bottom:10px"/>
+    <input class="inp" id="al-pass" placeholder="Admin password" type="password" style="margin-bottom:14px" onkeydown="if(event.key==='Enter')doAdminLogin()"/>
+    <button class="btn-admin" onclick="doAdminLogin()">Admin Panel Kholo →</button>
+    <div class="back-link" onclick="showUserLogin()">← User login pe wapas jao</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- ADMIN PANEL -->
+<!-- ══════════════════════════════════════ -->
+<div class="screen" id="adminPanel" style="flex-direction:column;overflow:hidden">
+  <div class="adm-hdr">
+    <div class="adm-hdr-l">
+      <div style="font-size:15px;font-weight:700">Perry<span style="color:var(--red)">AI</span></div>
+      <div class="adm-badge">ADMIN</div>
+    </div>
+    <div class="adm-hdr-r">
+      <button class="hdr-btn ghost" onclick="showChangePass()">🔑 Password Change</button>
+      <button class="hdr-btn danger" onclick="adminLogout()">Logout</button>
+    </div>
+  </div>
+  <div class="adm-body">
+    <div class="adm-nav">
+      <button class="nav-item active" onclick="aNav('dashboard',this)"><span class="nav-ic">📊</span> Dashboard</button>
+      <button class="nav-item" onclick="aNav('users',this)"><span class="nav-ic">👥</span> Users</button>
+      <button class="nav-item" onclick="aNav('chats',this)"><span class="nav-ic">💬</span> Chat Logs</button>
+      <button class="nav-item" onclick="aNav('ai',this)"><span class="nav-ic">🤖</span> AI Status</button>
+      <button class="nav-item" onclick="aNav('keys',this)"><span class="nav-ic">🔑</span> API Keys</button>
+      <button class="nav-item" onclick="aNav('settings',this)"><span class="nav-ic">⚙️</span> Settings</button>
+    </div>
+    <div class="adm-content" id="admContent"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════ -->
+<!-- USER APP -->
+<!-- ══════════════════════════════════════ -->
+<div class="screen" id="userApp" style="display:none;flex-direction:row">
+  <!-- Sidebar -->
+  <div class="sb" id="sb">
+    <div class="sb-top">
+      <div class="sb-logo"><div class="sb-logo-ic">🤖</div><div class="sb-logo-txt">Perry<span>AI</span></div></div>
+      <button class="ib" onclick="closeSb()">✕</button>
+    </div>
+    <button class="new-chat-btn" onclick="newChat()">✏️ &nbsp;New Chat</button>
+    <div class="sb-lbl">Recents</div>
+    <div class="hist" id="hist"></div>
+    <div class="sb-bottom">
+      <div class="sb-user" onclick="openKeysModal()">
+        <div class="sb-uav" id="sbUav">U</div>
+        <div style="flex:1;min-width:0">
+          <div class="sb-uname" id="sbUname">User</div>
+          <div class="sb-uinfo" id="sbUinfo">🔴 Setup keys</div>
+        </div>
+        <span style="font-size:12px;color:var(--t3)">⚙️</span>
+      </div>
+      <div class="sb-action" onclick="userLogout()">⏏️ &nbsp;Logout</div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="mob-bar">
+      <button class="ib" onclick="openSb()">☰</button>
+      <div style="font-size:14px;font-weight:700">Perry<span style="color:var(--ac)">AI</span></div>
+      <button class="ib" onclick="newChat()">✏️</button>
+    </div>
+    <div class="chat-area" id="chatArea">
+      <div class="welcome" id="welcome">
+        <div class="w-ic">🤖</div>
+        <div class="w-title">Kya poochna hai?</div>
+        <div class="w-sub">PerryAI tumhara personal assistant hai — market, writing, social media, coding, aur bahut kuch!</div>
+        <div class="sug-grid">
+          <div class="sug" onclick="sq('Aaj ke liye ek powerful motivational quote do aur uski deep meaning explain karo')"><div class="sug-t">✨ Motivate karo</div><div class="sug-s">Inspiring daily thought</div></div>
+          <div class="sug" onclick="sq('Ek viral Instagram reel script banao — topic: morning routine for success')"><div class="sug-t">📱 Reel script</div><div class="sug-s">Viral Instagram content</div></div>
+          <div class="sug" onclick="sq('5000 rupye se India mein invest karne ke 5 best options batao beginners ke liye')"><div class="sug-t">💰 Investment ideas</div><div class="sug-s">India ke liye smart options</div></div>
+          <div class="sug" onclick="sq('Mere boss ko ek professional email likho — subject: 2 din ki sick leave')"><div class="sug-t">✉️ Email likhwao</div><div class="sug-s">Professional tone mein</div></div>
+          <div class="sug" onclick="sq('Aaj Nifty50 aur top sectors ka market analysis do — kya khareedein kya nahi?')"><div class="sug-t">📊 Market analysis</div><div class="sug-s">NSE/BSE live update</div></div>
+          <div class="sug" onclick="sq('Is sentence ko improve karo: \"mai apna time management thik karna chahta hun\"')"><div class="sug-t">📝 Writing fix karo</div><div class="sug-s">Grammar + style improve</div></div>
+        </div>
+      </div>
+      <div class="msgs" id="msgs"></div>
+    </div>
+    <div class="inp-area">
+      <div class="inp-box">
+        <textarea class="chat-inp" id="chatInp" placeholder="Perry se kuch bhi poochho..." rows="1"
+          onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <div class="inp-btns">
+          <button class="ibt" id="micBtn" onclick="toggleMic()" title="Voice input">🎤</button>
+          <button class="send-btn" id="sendBtn" onclick="sendMsg()">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="inp-hint" id="inpHint">PerryAI • Auto AI • Hindi / Hinglish / English</div>
+    </div>
+  </div>
+</div>
+
+<!-- Keys Modal -->
+<div class="modal-bg" id="keysModal">
+  <div class="modal">
+    <div class="modal-t">🔑 AI Keys Setup</div>
+    <div class="modal-s">Ek ya zyada keys daalo — PerryAI silently best available use karega aur automatically switch karta rahega!</div>
+    <div class="prov-tip">💡 <strong>OpenRouter best hai</strong> — browser se seedha kaam karta hai!<br>👉 <a href="https://openrouter.ai" target="_blank">openrouter.ai</a> → Sign Up → API Keys → Create Key</div>
+    <input class="minp" id="kOR" type="password" placeholder="OpenRouter: sk-or-v1-..."/>
+    <input class="minp" id="kDS" type="password" placeholder="DeepSeek: sk-..."/>
+    <input class="minp" id="kGR" type="password" placeholder="Groq: gsk_..."/>
+    <input class="minp" id="kGM" type="password" placeholder="Gemini: AIza..."/>
+    <button class="mbtn" onclick="saveKeys()">Activate ✨</button>
+    <button class="mskip" onclick="closeKeysModal()">Baad mein</button>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal-bg" id="changePwModal">
+  <div class="modal">
+    <div class="modal-t">🔑 Admin Password Change</div>
+    <div class="modal-s">Naya strong password set karo admin account ke liye.</div>
+    <input class="minp" id="cp-old" type="password" placeholder="Purana password"/>
+    <input class="minp" id="cp-new" type="password" placeholder="Naya password (6+ chars)"/>
+    <input class="minp" id="cp-conf" type="password" placeholder="Naya password confirm karo"/>
+    <div class="ul-err" id="cp-err" style="margin-bottom:10px"></div>
+    <button class="mbtn" onclick="doChangePass()">Password Update Karo</button>
+    <button class="mskip" onclick="closeModal('changePwModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- Chat View Modal -->
+<div class="chat-modal" id="chatModal">
+  <div class="cm-box">
+    <div class="cm-hdr">
+      <div style="font-size:14px;font-weight:600" id="cmTitle">Chat History</div>
+      <button class="ib" onclick="closeModal('chatModal')" style="width:28px;height:28px">✕</button>
+    </div>
+    <div class="cm-body" id="cmBody"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════════════════
+// DATA STORE
+// ════════════════════════════════════════════════════════
+function LS(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch{return d;}}
+function LS_set(k,v){localStorage.setItem(k,JSON.stringify(v));}
+
+// Default admin
+const ADMIN_DEF = {username:'admin',password:'admin123',name:'Admin',role:'admin'};
+
+function getAdmin(){return LS('perry_admin',ADMIN_DEF);}
+function saveAdmin(a){LS_set('perry_admin',a);}
+function getUsers(){return LS('perry_users',{});}
+function saveUsers(u){LS_set('perry_users',u);}
+function getAllChats(){return LS('perry_all_chats',{});}
+function saveAllChats(c){LS_set('perry_all_chats',c);}
+function getAppSet(){return LS('perry_appset',{reg:true,gcid:'',voice:true});}
+function saveAppSet(s){LS_set('perry_appset',s);}
+
+// Session state
+let curUser = null;
+let curAdmin = null;
+let chatMsgs = [];
+let curHid = null;
+let userHist = [];
+let userMem = [];
+let generating = false;
+let micOn = false, rec = null;
+let switchCount = LS('pk_sw',0);
+let aiSwitchLog = LS('pk_log',[]);
+
+// API Keys
+let KEYS = {
+  openrouter: localStorage.getItem('pk_or')||'',
+  deepseek:   localStorage.getItem('pk_ds')||'',
+  groq:       localStorage.getItem('pk_gr')||'',
+  gemini:     localStorage.getItem('pk_gm')||''
+};
+// Refresh keys every time page loads
+function reloadKeys(){
+  KEYS.openrouter=localStorage.getItem('pk_or')||'';
+  KEYS.deepseek=localStorage.getItem('pk_ds')||'';
+  KEYS.groq=localStorage.getItem('pk_gr')||'';
+  KEYS.gemini=localStorage.getItem('pk_gm')||'';
+}
+let curProvIdx = LS('pk_cur',0);
+
+// ════════════════════════════════════════════════════════
+// AI PROVIDERS
+// ════════════════════════════════════════════════════════
+const PROVIDERS = [
+  {
+    id:'openrouter',name:'OpenRouter',short:'OR',icon:'🌊',
+    models:['meta-llama/llama-3.3-70b-instruct:free','mistralai/mistral-7b-instruct:free','google/gemma-2-9b-it:free','qwen/qwen-2-7b-instruct:free'],
+    mIdx:0,
+    call:async(msgs,sys,key)=>{
+      const p=PROVIDERS[0];
+      let r;
+      try{
+        r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+key,'HTTP-Referer':'https://perry-ai.vercel.app','X-Title':'PerryAI'},
+          body:JSON.stringify({model:p.models[p.mIdx],max_tokens:1400,messages:[{role:'system',content:sys},...msgs]})});
+      }catch(e){throw new Error('CORS: '+e.message);}
+      let d;
+      try{d=await r.json();}catch(e){throw new Error('Invalid response from OpenRouter');}
+      if(d.error){
+        const em=d.error.message||JSON.stringify(d.error);
+        // Try next model
+        if(em.includes('model')||em.includes('429')||em.includes('quota')){
+          if(p.mIdx<p.models.length-1){p.mIdx++;throw new Error('429: model limit');}
+        }
+        throw new Error(em);
+      }
+      if(!d.choices?.[0]?.message?.content)throw new Error('Empty response');
+      return d.choices[0].message.content;
+    }
+  },
+  {
+    id:'deepseek',name:'DeepSeek',short:'DS',icon:'🔵',
+    call:async(msgs,sys,key)=>{
+      const r=await fetch('https://api.deepseek.com/chat/completions',{method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+        body:JSON.stringify({model:'deepseek-chat',max_tokens:1400,messages:[{role:'system',content:sys},...msgs]})});
+      const d=await r.json();
+      if(d.error)throw new Error(d.error.message||JSON.stringify(d.error));
+      return d.choices[0].message.content;
+    }
+  },
+  {
+    id:'groq',name:'Groq',short:'GR',icon:'⚡',
+    models:['llama-3.3-70b-versatile','llama-3.1-8b-instant','gemma2-9b-it'],
+    mIdx:0,
+    call:async(msgs,sys,key)=>{
+      const p=PROVIDERS[2];
+      const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+        body:JSON.stringify({model:p.models[p.mIdx],max_tokens:1400,messages:[{role:'system',content:sys},...msgs]})});
+      const d=await r.json();
+      if(d.error)throw new Error(typeof d.error==='string'?d.error:d.error.message||JSON.stringify(d.error));
+      return d.choices[0].message.content;
+    }
+  },
+  {
+    id:'gemini',name:'Gemini',short:'GM',icon:'✨',
+    call:async(msgs,sys,key)=>{
+      const gc=msgs.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}));
+      const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:gc,generationConfig:{maxOutputTokens:1400}})});
+      const d=await r.json();
+      if(d.error)throw new Error(d.error.message);
+      return d.candidates[0].content.parts[0].text;
+    }
+  }
+];
+
+function getAvail(){return PROVIDERS.filter(p=>KEYS[p.id]);}
+function getCurProv(){const a=getAvail();return a.length?a[curProvIdx%a.length]:null;}
+
+function getSystemPrompt(){
+  const u = curUser;
+  const memStr = userMem.length?'\n\nUser ke baare mein pata hai: '+userMem.map(m=>m.k+'='+m.v).join(', '):'';
+  const userInfo = u?`\n\nUser ka naam: ${u.name||u.username}. Use familiar, warm tone.`:'';
+  return `Tum PerryAI ho — India ka best personal AI assistant. Tum ek smart, warm, helpful AI ho jo India ke users ke liye kaam karta hai.
+
+CAPABILITIES: Market analysis (NSE/BSE/crypto), investment advice (India-focused), writing improvement, social media posts (Instagram/Twitter/LinkedIn), email drafting, coding help, translations (Hindi↔English), general knowledge, motivational content, aur sab kuch jo user maange.
+
+LANGUAGE RULES: Hamesha user ki language mein jawab do — Hindi mein poochha? Hindi mein jawab. Hinglish? Hinglish. English? English. Mix? Mix.
+
+FORMATTING: **bold** for important points. Bullet points when listing. Code blocks for code. Keep responses concise but complete. Be warm and friendly like a knowledgeable friend.
+
+TRAINING: Users ke previous conversations se seekho aur unhe better serve karo. Unki preferences, interests aur communication style yaad rakho.${memStr}${userInfo}`;
+}
+
+async function smartCall(msgs){
+  const avail=getAvail();
+  if(!avail.length){openKeysModal();throw new Error('Koi API key nahi! Setup mein keys daalo.');}
+  const sys=getSystemPrompt();
+  for(let att=0;att<avail.length*3;att++){
+    const idx=(curProvIdx+att)%avail.length;
+    const prov=avail[idx];
+    try{
+      const res=await prov.call(msgs,sys,KEYS[prov.id]);
+      if(att>0){
+        curProvIdx=idx;LS_set('pk_cur',curProvIdx);
+        switchCount++;LS_set('pk_sw',switchCount);
+        const log=`${new Date().toLocaleTimeString('en-IN')} — Switched to ${prov.name} (attempt ${att+1})`;
+        aiSwitchLog.unshift(log);if(aiSwitchLog.length>30)aiSwitchLog=aiSwitchLog.slice(0,30);
+        LS_set('pk_log',aiSwitchLog);
+      }
+      updateAIStatus(prov.name);
+      // Save this exchange to global chat log
+      saveGlobalChat(msgs[msgs.length-1]?.content||'',res,prov.name);
+      return res;
+    }catch(e){
+      const em=e.message||'';
+      const isLimit=em.includes('402')||em.includes('429')||em.includes('Insufficient')||em.includes('quota')||em.includes('limit')||em.includes('RESOURCE_EXHAUSTED')||em.includes('rate');
+      const isCors=em.includes('fetch')||em.includes('NetworkError')||em.includes('Failed to fetch')||em.includes('CORS');
+      if(isLimit||isCors){
+        if(prov.models&&prov.mIdx<prov.models.length-1){prov.mIdx++;att--;continue;}
+        continue;
+      }
+      throw e;
+    }
+  }
+  throw new Error('Sab AI providers temporarily unavailable! Thodi der baad try karo ya naya key add karo.');
+}
+
+function saveGlobalChat(userMsg,aiMsg,provName){
+  if(!curUser)return;
+  const chats=getAllChats();
+  if(!chats[curUser.username])chats[curUser.username]=[];
+  chats[curUser.username].push({
+    user:userMsg.substring(0,200),
+    ai:aiMsg.substring(0,400),
+    prov:provName,
+    time:new Date().toLocaleString('en-IN'),
+    ts:Date.now()
+  });
+  if(chats[curUser.username].length>100)chats[curUser.username]=chats[curUser.username].slice(-100);
+  saveAllChats(chats);
+  // Update user msg count
+  const users=getUsers();
+  if(users[curUser.username]){users[curUser.username].msgs=(users[curUser.username].msgs||0)+1;saveUsers(users);}
+}
+
+function updateAIStatus(name){
+  document.getElementById('sbUinfo').textContent='🟢 '+name+' connected';
+  document.getElementById('inpHint').textContent='PerryAI • '+name+' • Hindi/Hinglish/English';
+}
+
+// ════════════════════════════════════════════════════════
+// SCREEN MANAGER
+// ════════════════════════════════════════════════════════
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.display='none';});
+  const sc=document.getElementById(id);
+  sc.style.display='flex';
+  setTimeout(()=>sc.classList.add('active'),10);
+}
+
+// ════════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════════
+(function init(){
+  const isAdmin=location.search.includes('admin');
+  // Check saved sessions
+  const savedUser=LS('perry_sess_user',null);
+  const savedAdmin=LS('perry_sess_admin',null);
+  if(savedAdmin){curAdmin=savedAdmin;showScreen('adminPanel');loadAdminNav('dashboard',document.querySelector('.nav-item'));return;}
+  if(savedUser){curUser=savedUser;showScreen('userApp');initUserApp();return;}
+  if(isAdmin)showScreen('adminLogin');
+  else showScreen('userLogin');
+  initGoogle();
+})();
+
+// ════════════════════════════════════════════════════════
+// USER AUTH
+// ════════════════════════════════════════════════════════
+function doLogin(){
+  const u=document.getElementById('ul-user').value.trim();
+  const p=document.getElementById('ul-pass').value.trim();
+  if(!u||!p){setUlErr('Sab fields bharo!');return;}
+  const users=getUsers();
+  if(!users[u]){setUlErr('❌ User nahi mila!');return;}
+  if(users[u].password!==p){setUlErr('❌ Password galat hai!');return;}
+  loginUser({...users[u],username:u});
+}
+function doRegister(){
+  const set=getAppSet();
+  if(!set.reg){setUlErr('❌ Registration abhi band hai!');return;}
+  const n=document.getElementById('ur-name').value.trim();
+  const u=document.getElementById('ur-user').value.trim();
+  const p=document.getElementById('ur-pass').value.trim();
+  if(!n||!u||!p){setUlErr('Sab fields bharo!');return;}
+  if(p.length<4){setUlErr('Password 4+ characters ka ho!');return;}
+  if(u==='admin'){setUlErr('❌ Yeh username reserved hai!');return;}
+  const users=getUsers();
+  if(users[u]){setUlErr('❌ Username pehle se le liya gaya!');return;}
+  users[u]={name:n,username:u,password:p,role:'user',joined:new Date().toLocaleDateString('en-IN'),msgs:0,joinedTs:Date.now()};
+  saveUsers(users);
+  loginUser({...users[u]});
+}
+function loginUser(user){
+  curUser=user;
+  LS_set('perry_sess_user',user);
+  userHist=LS('perry_hist_'+user.username,[]);
+  userMem=LS('perry_mem_'+user.username,[]);
+  showScreen('userApp');
+  initUserApp();
+  showToast('👋 Welcome, '+user.name+'!');
+}
+function userLogout(){
+  if(!confirm('Logout karna chahte ho?'))return;
+  curUser=null;localStorage.removeItem('perry_sess_user');
+  showScreen('userLogin');showLogin();
+}
+function setUlErr(m){document.getElementById('ul-err').innerHTML=m;}
+function showLogin(){
+  document.getElementById('ulForm').style.display='';
+  document.getElementById('ulReg').style.display='none';
+  document.getElementById('ul-title').textContent='Welcome back';
+  document.getElementById('ul-sub').textContent='Login karke Perry se baat karo — India ka smartest AI!';
+  setUlErr('');
+}
+function showReg(){
+  document.getElementById('ulForm').style.display='none';
+  document.getElementById('ulReg').style.display='';
+  document.getElementById('ul-title').textContent='Account banao';
+  document.getElementById('ul-sub').textContent='Free mein PerryAI access karo!';
+  setUlErr('');
+}
+
+// ════════════════════════════════════════════════════════
+// ADMIN AUTH
+// ════════════════════════════════════════════════════════
+function showAdminLogin(){showScreen('adminLogin');document.getElementById('al-err').textContent='';}
+function showUserLogin(){showScreen('userLogin');initGoogle();}
+function doAdminLogin(){
+  const u=document.getElementById('al-user').value.trim();
+  const p=document.getElementById('al-pass').value.trim();
+  if(!u||!p){document.getElementById('al-err').textContent='❌ Sab fields bharo!';return;}
+  const admin=getAdmin();
+  if(u!==admin.username||p!==admin.password){document.getElementById('al-err').textContent='❌ Wrong credentials!';return;}
+  curAdmin={username:u,name:'Admin'};
+  LS_set('perry_sess_admin',curAdmin);
+  showScreen('adminPanel');
+  loadAdminNav('dashboard',document.querySelector('.nav-item'));
+  showToast('✅ Admin Panel mein aagaye!');
+}
+function adminLogout(){
+  curAdmin=null;localStorage.removeItem('perry_sess_admin');
+  showScreen('adminLogin');
+}
+function showChangePass(){document.getElementById('cp-err').textContent='';openModal('changePwModal');}
+function doChangePass(){
+  const old=document.getElementById('cp-old').value.trim();
+  const nw=document.getElementById('cp-new').value.trim();
+  const cf=document.getElementById('cp-conf').value.trim();
+  const admin=getAdmin();
+  if(old!==admin.password){document.getElementById('cp-err').textContent='❌ Purana password galat!';return;}
+  if(nw.length<6){document.getElementById('cp-err').textContent='❌ Naya password 6+ chars ka ho!';return;}
+  if(nw!==cf){document.getElementById('cp-err').textContent='❌ Passwords match nahi karte!';return;}
+  saveAdmin({...admin,password:nw});
+  closeModal('changePwModal');
+  showToast('✅ Password change ho gaya!');
+}
+
+// ════════════════════════════════════════════════════════
+// ADMIN NAVIGATION
+// ════════════════════════════════════════════════════════
+function aNav(section,btn){
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  loadAdminNav(section,btn);
+}
+function loadAdminNav(section){
+  const cont=document.getElementById('admContent');
+  const users=getUsers();
+  const allChats=getAllChats();
+  const uArr=Object.entries(users);
+  const totalMsgs=uArr.reduce((a,[,u])=>a+(u.msgs||0),0);
+  const totalChats=Object.values(allChats).reduce((a,c)=>a+c.length,0);
+  const prov=getCurProv();
+
+  if(section==='dashboard'){
+    cont.innerHTML=`
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-val" style="color:var(--ac)">${uArr.length}</div><div class="stat-lbl">Total Users</div><div class="stat-trend up">👥 Registered accounts</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--blue)">${totalMsgs}</div><div class="stat-lbl">Total Messages</div><div class="stat-trend up">💬 User se AI tak</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--yellow)">${totalChats}</div><div class="stat-lbl">Chat Exchanges</div><div class="stat-trend up">🔄 Logged conversations</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:${prov?'var(--ac)':'var(--red)'}">${prov?prov.short:'-'}</div><div class="stat-lbl">Active AI</div><div class="stat-trend ${prov?'up':'dn'}">${prov?'🟢 '+prov.name:'❌ No key set'}</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--yellow)">${switchCount}</div><div class="stat-lbl">AI Switches</div><div class="stat-trend up">🔀 Silent auto-switches</div></div>
+      <div class="stat-card"><div class="stat-val" style="color:var(--ac)">${getAvail().length}</div><div class="stat-lbl">Active Providers</div><div class="stat-trend up">🤖 / ${PROVIDERS.length} configured</div></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hdr"><div class="sec-title">📊 Recent Activity</div></div>
+      <div class="sec-body">
+        ${uArr.length===0?'<div style="color:var(--t3);font-size:13px">Koi user nahi abhi tak.</div>':
+        uArr.slice(-5).reverse().map(([un,u])=>`
+          <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+            <div style="width:30px;height:30px;border-radius:50%;background:var(--user);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;flex-shrink:0">${(u.name||un)[0].toUpperCase()}</div>
+            <div style="flex:1"><div style="font-size:13px;font-weight:500">${u.name}</div><div style="font-size:11px;color:var(--t2)">@${un} • Joined ${u.joined||'?'}</div></div>
+            <div style="font-size:12px;color:var(--t2)">${u.msgs||0} msgs</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  else if(section==='users'){
+    cont.innerHTML=`
+    <div class="sec" style="margin-bottom:14px">
+      <div class="sec-hdr"><div class="sec-title">➕ Naya User Add Karo</div></div>
+      <div class="sec-body">
+        <div class="form-row">
+          <input class="a-inp" id="aN" placeholder="Naam"/>
+          <input class="a-inp" id="aU" placeholder="Username"/>
+        </div>
+        <div class="form-row">
+          <input class="a-inp" id="aP" type="password" placeholder="Password"/>
+          <select class="a-inp" id="aR" style="cursor:pointer"><option value="user">User</option></select>
+        </div>
+        <button class="a-btn" onclick="adminAddUser()">User Add Karo</button>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-hdr"><div class="sec-title">👥 Sab Users (${uArr.length})</div><button class="a-btn sec-btn" onclick="loadAdminNav('users')">🔄 Refresh</button></div>
+      <div class="sec-body" style="padding:0">
+        <table class="tbl">
+          <thead><tr><th>Naam</th><th>Username</th><th>Role</th><th>Messages</th><th>Joined</th><th>Actions</th></tr></thead>
+          <tbody>
+            ${uArr.length===0?'<tr><td colspan="6" style="text-align:center;color:var(--t3);padding:20px">Koi user nahi abhi tak</td></tr>':
+            uArr.map(([un,u])=>`
+              <tr>
+                <td><div style="display:flex;align-items:center;gap:8px"><div style="width:26px;height:26px;border-radius:50%;background:var(--user);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff;flex-shrink:0">${(u.name||un)[0].toUpperCase()}</div>${u.name}</div></td>
+                <td><code style="background:var(--card2);padding:2px 7px;border-radius:5px;font-size:11px;font-family:var(--mono)">@${un}</code></td>
+                <td><span class="badge b-user">👤 User</span></td>
+                <td style="color:var(--t2)">${u.msgs||0}</td>
+                <td style="color:var(--t2);font-size:11.5px">${u.joined||'-'}</td>
+                <td style="display:flex;gap:5px;flex-wrap:wrap">
+                  <button class="tbl-btn view" onclick="viewUserChat('${un}')">💬 Chats</button>
+                  <button class="tbl-btn del" onclick="adminDelUser('${un}')">🗑️</button>
+                </td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  }
+
+  else if(section==='chats'){
+    cont.innerHTML=`
+    <div class="sec">
+      <div class="sec-hdr"><div class="sec-title">💬 Sab Users ke Chat Logs</div><button class="a-btn sec-btn" onclick="loadAdminNav('chats')">🔄</button></div>
+      <div class="sec-body" style="padding:0">
+        <table class="tbl">
+          <thead><tr><th>User</th><th>User Message</th><th>AI Response</th><th>Provider</th><th>Time</th></tr></thead>
+          <tbody>
+            ${Object.entries(allChats).flatMap(([un,chats])=>chats.slice(-20).map(c=>`
+              <tr>
+                <td><code style="font-size:11px;font-family:var(--mono)">@${un}</code></td>
+                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px">${esc(c.user)}</td>
+                <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--t2)">${esc(c.ai)}</td>
+                <td><span class="badge b-on" style="font-size:10px">${c.prov||'?'}</span></td>
+                <td style="font-size:11px;color:var(--t3);white-space:nowrap">${c.time||'-'}</td>
+              </tr>`)).reverse().slice(0,50).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--t3);padding:20px">Koi chat log nahi</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  }
+
+  else if(section==='ai'){
+    cont.innerHTML=`
+    <div class="sec" style="margin-bottom:14px">
+      <div class="sec-hdr"><div class="sec-title">🤖 AI Providers Status</div></div>
+      <div class="sec-body">
+        ${PROVIDERS.map(p=>{
+          const hasKey=!!KEYS[p.id];
+          const isCur=getCurProv()?.id===p.id;
+          return `<div class="ai-prov-row">
+            <div class="ai-dot ${hasKey?(isCur?'active':'ready'):'none'}"></div>
+            <div style="font-size:15px">${p.icon}</div>
+            <div style="flex:1"><div style="font-size:13px;font-weight:500">${p.name}</div><div style="font-size:11px;color:var(--t2)">${hasKey?'Key configured':'No key'}</div></div>
+            <span class="badge ${hasKey?(isCur?'b-on':'b-off'):'b-off'}">${hasKey?(isCur?'🟢 Active':'⚪ Standby'):'❌ No Key'}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-hdr"><div class="sec-title">🔀 Switch Log</div><span style="font-size:11px;color:var(--t2)">Total: ${switchCount} switches</span></div>
+      <div class="sec-body">
+        <div class="ai-log">${aiSwitchLog.length?aiSwitchLog.map(l=>`<div>→ ${l}</div>`).join(''):'Koi switch nahi hua abhi tak — sab smooth!'}</div>
+      </div>
+    </div>`;
+  }
+
+  else if(section==='keys'){
+    cont.innerHTML=`
+    <div class="sec">
+      <div class="sec-hdr"><div class="sec-title">🔑 API Keys Manager</div></div>
+      <div class="sec-body">
+        <div style="font-size:12.5px;color:var(--t2);margin-bottom:16px;line-height:1.8">Keys daalo — PerryAI automatically best available use karega. Sab keys encrypted local storage mein save hain.</div>
+        <div style="margin-bottom:14px">
+          <div style="font-size:11px;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">🌊 OpenRouter (Recommended)</div>
+          <input class="a-inp" id="ak-or" type="password" placeholder="sk-or-v1-..." value="${KEYS.openrouter?'●'.repeat(20):''}"/>
+          <div style="font-size:11px;color:var(--t2)">Free models: Llama 3.3 70B, Mistral, Gemma • <a href="https://openrouter.ai" target="_blank" style="color:var(--ac)">openrouter.ai</a></div>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="font-size:11px;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">🔵 DeepSeek</div>
+          <input class="a-inp" id="ak-ds" type="password" placeholder="sk-..." value="${KEYS.deepseek?'●'.repeat(20):''}"/>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="font-size:11px;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">⚡ Groq (Super Fast)</div>
+          <input class="a-inp" id="ak-gr" type="password" placeholder="gsk_..." value="${KEYS.groq?'●'.repeat(20):''}"/>
+        </div>
+        <div style="margin-bottom:16px">
+          <div style="font-size:11px;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">✨ Google Gemini</div>
+          <input class="a-inp" id="ak-gm" type="password" placeholder="AIza..." value="${KEYS.gemini?'●'.repeat(20):''}"/>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="a-btn" onclick="adminSaveKeys()">Save Keys ✅</button>
+          <button class="a-btn sec-btn" onclick="clearAllKeys()">🗑️ Clear All</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  else if(section==='settings'){
+    const set=getAppSet();
+    cont.innerHTML=`
+    <div class="sec">
+      <div class="sec-hdr"><div class="sec-title">⚙️ App Settings</div></div>
+      <div class="sec-body">
+        <div class="set-row">
+          <div class="set-info"><div class="set-lbl">New Registrations</div><div class="set-sub">Naye users sign up kar sakenge</div></div>
+          <button class="toggle ${set.reg?'on':''}" id="tog-reg" onclick="togSet('reg',this)"></button>
+        </div>
+        <div class="set-row">
+          <div class="set-info"><div class="set-lbl">Voice Input</div><div class="set-sub">Mic button users ke liye</div></div>
+          <button class="toggle ${set.voice?'on':''}" id="tog-voice" onclick="togSet('voice',this)"></button>
+        </div>
+        <div class="set-row">
+          <div class="set-info"><div class="set-lbl">Google Login</div><div class="set-sub">Google OAuth Client ID</div></div>
+          <input class="a-inp" id="gcid-inp" placeholder="XXXXX.apps.googleusercontent.com" value="${set.gcid||''}" style="margin:0;width:260px;font-size:11.5px"/>
+        </div>
+        <div style="margin-top:14px">
+          <button class="a-btn" onclick="saveAdmSettings()">Save Settings</button>
+        </div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="sec-hdr"><div class="sec-title">🗑️ Data Management</div></div>
+      <div class="sec-body">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="a-btn sec-btn" onclick="exportData()">📥 Export All Data</button>
+          <button class="a-btn" style="background:rgba(255,71,87,.1);color:var(--red);border:1px solid rgba(255,71,87,.2)" onclick="clearChatLogs()">🗑️ Clear Chat Logs</button>
+        </div>
+      </div>
+    </div>`;
+  }
+}
+
+// Admin Actions
+function adminAddUser(){
+  const n=document.getElementById('aN').value.trim();
+  const u=document.getElementById('aU').value.trim();
+  const p=document.getElementById('aP').value.trim();
+  if(!n||!u||!p){showToast('❌ Sab fields bharo!');return;}
+  if(u==='admin'){showToast('❌ Reserved username!');return;}
+  const users=getUsers();
+  if(users[u]){showToast('❌ Username pehle se hai!');return;}
+  users[u]={name:n,username:u,password:p,role:'user',joined:new Date().toLocaleDateString('en-IN'),msgs:0,joinedTs:Date.now()};
+  saveUsers(users);showToast('✅ User add ho gaya!');loadAdminNav('users');
+}
+function adminDelUser(u){
+  if(!confirm('@'+u+' ko delete karo?'))return;
+  const users=getUsers();delete users[u];saveUsers(users);
+  const chats=getAllChats();delete chats[u];saveAllChats(chats);
+  showToast('🗑️ User deleted!');loadAdminNav('users');
+}
+function viewUserChat(un){
+  const chats=getAllChats();
+  const uchats=chats[un]||[];
+  document.getElementById('cmTitle').textContent='@'+un+' ke '+uchats.length+' chats';
+  document.getElementById('cmBody').innerHTML=uchats.length===0?'<div style="color:var(--t3);font-size:13px;text-align:center;padding:20px">Koi chat nahi</div>':
+    uchats.slice(-30).reverse().map(c=>`
+      <div class="cm-msg"><div class="cm-av u">U</div><div class="cm-txt">${esc(c.user)}<div style="font-size:10px;color:var(--t3);margin-top:5px">${c.time}</div></div></div>
+      <div class="cm-msg"><div class="cm-av a">🤖</div><div class="cm-txt">${esc(c.ai.substring(0,300))}${c.ai.length>300?'...':''}<div style="font-size:10px;color:var(--ac);margin-top:5px">via ${c.prov}</div></div></div>`).join('');
+  openModal('chatModal');
+}
+function adminSaveKeys(){
+  const kO=document.getElementById('ak-or').value.trim();
+  const kD=document.getElementById('ak-ds').value.trim();
+  const kG=document.getElementById('ak-gr').value.trim();
+  const kGm=document.getElementById('ak-gm').value.trim();
+  if(kO&&!kO.includes('●')){KEYS.openrouter=kO;localStorage.setItem('pk_or',kO);}
+  if(kD&&!kD.includes('●')){KEYS.deepseek=kD;localStorage.setItem('pk_ds',kD);}
+  if(kG&&!kG.includes('●')){KEYS.groq=kG;localStorage.setItem('pk_gr',kG);}
+  if(kGm&&!kGm.includes('●')){KEYS.gemini=kGm;localStorage.setItem('pk_gm',kGm);}
+  curProvIdx=0;LS_set('pk_cur',0);
+  showToast('✅ Keys saved! PerryAI ready!');loadAdminNav('keys');
+}
+function clearAllKeys(){
+  if(!confirm('Sab keys delete karo?'))return;
+  KEYS={openrouter:'',deepseek:'',groq:'',gemini:''};
+  ['pk_or','pk_ds','pk_gr','pk_gm'].forEach(k=>localStorage.removeItem(k));
+  showToast('🗑️ Keys cleared!');loadAdminNav('keys');
+}
+function togSet(k,btn){
+  const set=getAppSet();set[k]=!set[k];saveAppSet(set);
+  btn.classList.toggle('on',set[k]);
+}
+function saveAdmSettings(){
+  const set=getAppSet();
+  const gcid=document.getElementById('gcid-inp').value.trim();
+  set.gcid=gcid;saveAppSet(set);
+  if(gcid)localStorage.setItem('perry_gcid',gcid);
+  showToast('✅ Settings saved!');
+}
+function exportData(){
+  const data={users:getUsers(),chats:getAllChats(),settings:getAppSet(),aiLog:aiSwitchLog,exported:new Date().toISOString()};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='perryai-data-'+Date.now()+'.json';a.click();
+  showToast('📥 Data exported!');
+}
+function clearChatLogs(){
+  if(!confirm('Sab chat logs delete karo? Yeh undo nahi hoga!'))return;
+  saveAllChats({});showToast('🗑️ Chat logs cleared!');loadAdminNav('chats');
+}
+
+// ════════════════════════════════════════════════════════
+// USER APP INIT
+// ════════════════════════════════════════════════════════
+function initUserApp(){
+  reloadKeys(); // Always get fresh keys from localStorage
+  userHist=LS('perry_hist_'+curUser.username,[]);
+  userMem=LS('perry_mem_'+curUser.username,[]);
+  // Set avatar
+  const av=document.getElementById('sbUav');
+  if(curUser.picture){av.innerHTML=`<img src="${curUser.picture}" onerror="this.parentElement.textContent='${(curUser.name||'U')[0].toUpperCase()}'"/>`;}
+  else{av.textContent=(curUser.name||'U')[0].toUpperCase();}
+  document.getElementById('sbUname').textContent=curUser.name||curUser.username;
+  const prov=getCurProv();
+  document.getElementById('sbUinfo').textContent=prov?'🟢 '+prov.name+' connected':'🔴 Setup keys';
+  document.getElementById('inpHint').textContent=prov?'PerryAI • '+prov.name+' • Hindi/Hinglish/English':'PerryAI • Keys setup karo • Hindi/Hinglish/English';
+  renderHist();
+  if(!getAvail().length)setTimeout(openKeysModal,800);
+}
+
+// ════════════════════════════════════════════════════════
+// GOOGLE AUTH
+// ════════════════════════════════════════════════════════
+function initGoogle(){
+  const gcid=localStorage.getItem('perry_gcid')||getAppSet().gcid;
+  if(!gcid)return;
+  function tryInit(){
+    if(window.google?.accounts){
+      google.accounts.id.initialize({client_id:gcid,callback:handleGoogle,auto_select:false});
+      google.accounts.id.renderButton(document.getElementById('gBtnWrap'),{theme:'filled_black',size:'large',width:340,text:'signin_with'});
+    }else setTimeout(tryInit,400);
+  }
+  tryInit();
+}
+window.onGoogleLibraryLoad=initGoogle;
+function handleGoogle(resp){
+  try{
+    const b64=resp.credential.split('.')[1];
+    const pad=b64+'='.repeat((4-b64.length%4)%4);
+    const p=JSON.parse(atob(pad.replace(/-/g,'+').replace(/_/g,'/')));
+    const uname='g_'+p.sub.substring(0,10);
+    const users=getUsers();
+    if(!users[uname])users[uname]={name:p.name,email:p.email,picture:p.picture,username:uname,role:'user',authType:'google',joined:new Date().toLocaleDateString('en-IN'),msgs:0,joinedTs:Date.now()};
+    saveUsers(users);
+    loginUser({...users[uname],username:uname});
+  }catch(e){setUlErr('❌ Google login error: '+e.message);}
+}
+
+// ════════════════════════════════════════════════════════
+// CHAT ENGINE
+// ════════════════════════════════════════════════════════
+function sq(t){document.getElementById('chatInp').value=t;sendMsg();}
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,160)+'px';}
+
+async function sendMsg(){
+  const el=document.getElementById('chatInp');
+  const text=el.value.trim();
+  if(!text||generating)return;
+  if(!getAvail().length){openKeysModal();return;}
+  el.value='';el.style.height='auto';
+  document.getElementById('welcome').style.display='none';
+  chatMsgs.push({role:'user',content:text});
+  renderMsg('user',text);
+  saveHistEntry(text);
+  autoMemory(text);
+  const tid=showTyping();
+  generating=true;
+  document.getElementById('sendBtn').disabled=true;
+  try{
+    const reply=await smartCall(chatMsgs.slice(-16));
+    chatMsgs.push({role:'assistant',content:reply});
+    renderMsg('ai',reply);
+    saveHistMsgs();
+  }catch(e){
+    let em=e.message||'Unknown error';
+    let hint='';
+    if(em.includes('401')||em.includes('invalid_api_key')||em.includes('Unauthorized'))hint=' ⚠️ API Key galat hai! Setup mein dobara daalo.';
+    else if(em.includes('402')||em.includes('Insufficient'))hint=' ⚠️ Credit khatam!';
+    else if(em.includes('CORS')||em.includes('Failed to fetch'))hint=' ⚠️ Network error — Groq ya Gemini key daalo (sidebar > gear icon)';
+    else if(em.includes('Empty')||em.includes('No response'))hint=' — Retry karo.';
+    renderMsg('ai','❌ '+em+hint);
+  }
+  removeTyping(tid);
+  generating=false;
+  document.getElementById('sendBtn').disabled=false;
+  document.getElementById('chatInp').focus();
+}
+
+function renderMsg(role,text){
+  const wrap=document.getElementById('msgs');
+  const div=document.createElement('div');
+  div.className='mrow '+role;
+  const id='m'+Date.now()+'_'+Math.random().toString(36).substr(2,4);
+  const isUser=role==='user';
+  let avHtml='';
+  if(isUser){
+    if(curUser?.picture)avHtml=`<div class="av uav"><img src="${curUser.picture}" onerror="this.outerHTML='<div class=av uav style=display:flex;align-items:center;justify-content:center>${(curUser?.name||'U')[0].toUpperCase()}</div>'"/></div>`;
+    else avHtml=`<div class="av uav" style="display:flex;align-items:center;justify-content:center">${(curUser?.name||'U')[0].toUpperCase()}</div>`;
+  }else{avHtml='<div class="av aav" style="display:flex;align-items:center;justify-content:center">🤖</div>';}
+  div.innerHTML=isUser
+    ?`${avHtml}<div class="mc"><div class="mb" id="${id}">${fmt(text)}</div></div>`
+    :`${avHtml}<div class="mc"><div class="mb" id="${id}">${fmt(text)}</div><div class="macts"><button class="mact" onclick="copyMsg('${id}')">📋 Copy</button><button class="mact" onclick="speakMsg('${id}')">🔊 Suno</button></div></div>`;
+  wrap.appendChild(div);
+  wrap.parentElement.scrollTop=wrap.parentElement.scrollHeight;
+}
+
+function fmt(t){
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/```([\s\S]*?)```/g,'<pre><code>$1</code></pre>')
+    .replace(/`([^`]+)`/g,'<code>$1</code>')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/\n/g,'<br>');
+}
+function esc(t){return t?t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''}
+
+function showTyping(){
+  const wrap=document.getElementById('msgs');
+  const id='typ'+Date.now();
+  const d=document.createElement('div');
+  d.className='typing-row';d.id=id;
+  d.innerHTML='<div class="av aav" style="display:flex;align-items:center;justify-content:center">🤖</div><div class="tdots"><div class="td"></div><div class="td"></div><div class="td"></div></div>';
+  wrap.appendChild(d);
+  wrap.parentElement.scrollTop=wrap.parentElement.scrollHeight;
+  return id;
+}
+function removeTyping(id){document.getElementById(id)?.remove();}
+function copyMsg(id){navigator.clipboard.writeText(document.getElementById(id)?.innerText||'');showToast('📋 Copied!');}
+let ttsU=null;
+function speakMsg(id){
+  const txt=document.getElementById(id)?.innerText||'';
+  if(ttsU&&speechSynthesis.speaking)speechSynthesis.cancel();
+  ttsU=new SpeechSynthesisUtterance(txt);
+  ttsU.lang=/[\u0900-\u097F]/.test(txt)?'hi-IN':'en-IN';ttsU.rate=.95;
+  speechSynthesis.speak(ttsU);
+}
+
+// ════════════════════════════════════════════════════════
+// VOICE
+// ════════════════════════════════════════════════════════
+function toggleMic(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){showToast('❌ Chrome mein use karo!');return;}
+  const btn=document.getElementById('micBtn');
+  if(micOn&&rec){rec.stop();micOn=false;btn.classList.remove('mic-on');btn.textContent='🎤';return;}
+  rec=new SR();rec.lang='hi-IN';rec.interimResults=true;rec.continuous=false;
+  micOn=true;btn.classList.add('mic-on');btn.textContent='⏹️';showToast('🎤 Bol raha hun...');
+  rec.onresult=e=>{
+    const t=Array.from(e.results).map(r=>r[0].transcript).join('');
+    document.getElementById('chatInp').value=t;autoResize(document.getElementById('chatInp'));
+  };
+  rec.onend=()=>{micOn=false;btn.classList.remove('mic-on');btn.textContent='🎤';};
+  rec.onerror=()=>{micOn=false;btn.classList.remove('mic-on');btn.textContent='🎤';};
+  rec.start();
+}
+
+// ════════════════════════════════════════════════════════
+// MEMORY SYSTEM — Learn from users
+// ════════════════════════════════════════════════════════
+const MEM_PATTERNS=[
+  {r:/mera naam (.+?) hai/i,k:'Naam'},{r:/main (.+?) mein rehta/i,k:'Shehar'},
+  {r:/my name is ([a-zA-Z]+)/i,k:'Name'},{r:/i live in (.+)/i,k:'City'},
+  {r:/mujhe (.+?) pasand hai/i,k:'Pasand'},{r:/meri age (.+?) hai/i,k:'Umar'},
+  {r:/main (.+?) karta hun/i,k:'Kaam'},{r:/i (work|am) (?:a |an )?(.+)/i,k:'Job'},
+  {r:/mera budget (.+?) hai/i,k:'Budget'},{r:/i like (.+)/i,k:'Interest'},
+];
+function autoMemory(text){
+  MEM_PATTERNS.forEach(({r,k})=>{
+    const m=text.match(r);
+    if(m&&m[1]&&!userMem.find(x=>x.k===k)){
+      userMem.unshift({k,v:(m[2]||m[1]).trim().substring(0,50)});
+      if(userMem.length>25)userMem=userMem.slice(0,25);
+      LS_set('perry_mem_'+curUser.username,userMem);
+    }
+  });
+}
+
+// ════════════════════════════════════════════════════════
+// HISTORY
+// ════════════════════════════════════════════════════════
+function saveHistEntry(first){
+  if(!curHid){
+    curHid=Date.now();
+    userHist.unshift({id:curHid,title:first.substring(0,44)+(first.length>44?'…':''),msgs:[]});
+    if(userHist.length>80)userHist=userHist.slice(0,80);
+    LS_set('perry_hist_'+curUser.username,userHist);
+    renderHist();
+  }
+}
+function saveHistMsgs(){
+  const h=userHist.find(x=>x.id===curHid);
+  if(h){h.msgs=chatMsgs.slice(-20);LS_set('perry_hist_'+curUser.username,userHist);}
+}
+function renderHist(){
+  const el=document.getElementById('hist');
+  if(!userHist.length){el.innerHTML='<div style="font-size:12px;color:var(--t3);padding:10px 12px">Koi chat nahi abhi tak</div>';return;}
+  el.innerHTML=userHist.map(h=>`<div class="hi ${h.id===curHid?'active':''}" onclick="loadChat(${h.id})">${h.title}</div>`).join('');
+}
+function loadChat(id){
+  const h=userHist.find(x=>x.id===id);if(!h)return;
+  curHid=id;chatMsgs=h.msgs||[];
+  document.getElementById('msgs').innerHTML='';
+  document.getElementById('welcome').style.display='none';
+  chatMsgs.forEach(m=>renderMsg(m.role==='user'?'user':'ai',m.content));
+  closeSb();renderHist();
+}
+function newChat(){
+  curHid=null;chatMsgs=[];
+  document.getElementById('msgs').innerHTML='';
+  document.getElementById('welcome').style.display='';
+  closeSb();renderHist();
+}
+
+// ════════════════════════════════════════════════════════
+// KEYS MODAL
+// ════════════════════════════════════════════════════════
+function openKeysModal(){
+  // Always reload from localStorage first
+  KEYS.openrouter=localStorage.getItem('pk_or')||'';
+  KEYS.deepseek=localStorage.getItem('pk_ds')||'';
+  KEYS.groq=localStorage.getItem('pk_gr')||'';
+  KEYS.gemini=localStorage.getItem('pk_gm')||'';
+  if(KEYS.openrouter)document.getElementById('kOR').value=KEYS.openrouter;
+  if(KEYS.deepseek)document.getElementById('kDS').value=KEYS.deepseek;
+  if(KEYS.groq)document.getElementById('kGR').value=KEYS.groq;
+  if(KEYS.gemini)document.getElementById('kGM').value=KEYS.gemini;
+  openModal('keysModal');
+}
+function closeKeysModal(){closeModal('keysModal');}
+function saveKeys(){
+  const kO=document.getElementById('kOR').value.trim();
+  const kD=document.getElementById('kDS').value.trim();
+  const kG=document.getElementById('kGR').value.trim();
+  const kGm=document.getElementById('kGM').value.trim();
+  let saved=[];
+  if(kO){KEYS.openrouter=kO;localStorage.setItem('pk_or',kO);saved.push('OpenRouter');}
+  if(kD){KEYS.deepseek=kD;localStorage.setItem('pk_ds',kD);saved.push('DeepSeek');}
+  if(kG){KEYS.groq=kG;localStorage.setItem('pk_gr',kG);saved.push('Groq');}
+  if(kGm){KEYS.gemini=kGm;localStorage.setItem('pk_gm',kGm);saved.push('Gemini');}
+  if(!saved.length){showToast('❌ Kam se kam ek key daalo!');return;}
+  curProvIdx=0;LS_set('pk_cur',0);
+  const prov=getCurProv();
+  if(prov)updateAIStatus(prov.name);
+  closeModal('keysModal');
+  showToast('✅ '+saved.join(' + ')+' connected!');
+}
+
+// ════════════════════════════════════════════════════════
+// SIDEBAR
+// ════════════════════════════════════════════════════════
+function openSb(){document.getElementById('sb').classList.add('open');document.getElementById('sbOv').classList.add('open');}
+function closeSb(){document.getElementById('sb').classList.remove('open');document.getElementById('sbOv').classList.remove('open');}
+
+// ════════════════════════════════════════════════════════
+// MODALS
+// ════════════════════════════════════════════════════════
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// ════════════════════════════════════════════════════════
+// TOAST
+// ════════════════════════════════════════════════════════
+function showToast(m){
+  const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3200);
+}
+</script>
+</body>
+</html>
