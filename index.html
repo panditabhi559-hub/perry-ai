@@ -531,18 +531,14 @@ const PROVIDERS = [
         r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',
           headers:{'Content-Type':'application/json','Authorization':'Bearer '+key,'HTTP-Referer':'https://perry-ai.vercel.app','X-Title':'PerryAI'},
           body:JSON.stringify({model:p.models[p.mIdx],max_tokens:1400,messages:[{role:'system',content:sys},...msgs]})});
-      }catch(e){throw new Error('CORS: '+e.message);}
+      }catch(e){throw new Error('Failed to fetch: '+e.message);}
       let d;
-      try{d=await r.json();}catch(e){throw new Error('Invalid response from OpenRouter');}
+      try{d=await r.json();}catch(e){throw new Error('429');}
       if(d.error){
         const em=d.error.message||JSON.stringify(d.error);
-        // Try next model
-        if(em.includes('model')||em.includes('429')||em.includes('quota')){
-          if(p.mIdx<p.models.length-1){p.mIdx++;throw new Error('429: model limit');}
-        }
-        throw new Error(em);
+        throw new Error('429: '+em);
       }
-      if(!d.choices?.[0]?.message?.content)throw new Error('Empty response');
+      if(!d.choices?.[0]?.message?.content)throw new Error('429: empty');
       return d.choices[0].message.content;
     }
   },
@@ -625,13 +621,21 @@ async function smartCall(msgs){
       return res;
     }catch(e){
       const em=e.message||'';
-      const isLimit=em.includes('402')||em.includes('429')||em.includes('Insufficient')||em.includes('quota')||em.includes('limit')||em.includes('RESOURCE_EXHAUSTED')||em.includes('rate');
-      const isCors=em.includes('fetch')||em.includes('NetworkError')||em.includes('Failed to fetch')||em.includes('CORS');
+      const isLimit=em.includes('402')||em.includes('429')||em.includes('Insufficient')||em.includes('quota')||em.includes('limit')||em.includes('RESOURCE_EXHAUSTED')||em.includes('rate')||em.includes('Too Many')||em.includes('Provider')||em.includes('empty');
+      const isCors=em.includes('fetch')||em.includes('NetworkError')||em.includes('Failed')||em.includes('CORS');
       if(isLimit||isCors){
-        if(prov.models&&prov.mIdx<prov.models.length-1){prov.mIdx++;att--;continue;}
+        // Try next model within same provider
+        if(prov.models&&prov.mIdx<prov.models.length-1){
+          prov.mIdx++;
+          continue; // retry same provider with next model
+        }
+        // Move to next provider silently
+        console.log('Switching from',prov.name,'reason:',em.substring(0,50));
         continue;
       }
-      throw e;
+      // Unknown error - also try next provider
+      console.log('Unknown error from',prov.name,':',em.substring(0,80));
+      continue;
     }
   }
   throw new Error('Sab AI providers temporarily unavailable! Thodi der baad try karo ya naya key add karo.');
