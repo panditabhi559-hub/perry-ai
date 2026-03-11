@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="PerryAI">
 <meta name="theme-color" content="#0a0a0a">
 <link rel="manifest" id="pwaManifest">
-<title>PerryAI v1.4</title>
+<title>PerryAI v2.2</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
@@ -244,11 +244,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 .w-ic{width:64px;height:64px;background:linear-gradient(135deg,var(--ac),#0ea5e9);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 0 50px rgba(16,185,129,.25),0 0 100px rgba(16,185,129,.1)}
 .w-title{font-size:26px;font-weight:700;letter-spacing:-.4px;text-align:center}
 .w-sub{font-size:14px;color:var(--t2);text-align:center;max-width:380px;line-height:1.7}
-.sug-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;width:100%;max-width:560px}
-.sug{background:var(--card);border:1px solid var(--b);border-radius:13px;padding:14px 16px;cursor:pointer;transition:all .2s;text-align:left;position:relative;overflow:hidden}
+.sug-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:620px}
+.sug{background:var(--card);border:1px solid var(--b);border-radius:14px;padding:18px 20px;cursor:pointer;transition:all .2s;text-align:left;position:relative;overflow:hidden;min-height:72px;display:flex;flex-direction:column;justify-content:center}
 .sug:hover{background:var(--card2);border-color:var(--ac);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
-.sug-t{font-size:13px;font-weight:600;margin-bottom:3px}
-.sug-s{font-size:11.5px;color:var(--t2);line-height:1.45}
+.sug-t{font-size:13.5px;font-weight:600;margin-bottom:4px;color:var(--t1)}
+.sug-s{font-size:12px;color:var(--t2);line-height:1.4}
 
 /* Messages */
 .msgs{padding:8px 0 16px}
@@ -291,6 +291,29 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 .ibt{width:32px;height:32px;border-radius:8px;border:none;background:transparent;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .15s}
 .ibt:hover{background:var(--card2);color:var(--t2)}
 .ibt.mic-on{background:var(--red);color:#fff;animation:mic-pulse .8s infinite}
+
+/* Voice Call Button */
+.voice-call-btn{width:34px;height:34px;border-radius:50%;border:none;background:transparent;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.voice-call-btn:hover{background:var(--card2);color:var(--t1)}
+.voice-call-btn.vc-active{background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 0 18px rgba(16,185,129,.5);animation:vcPulse 1.5s infinite}
+.voice-call-btn.vc-listening{background:linear-gradient(135deg,var(--red),#e11d48);color:#fff;box-shadow:0 0 18px rgba(239,68,68,.5);animation:vcPulse .8s infinite}
+.voice-call-btn.vc-thinking{background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff}
+@keyframes vcPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+
+/* Voice Call Overlay Bar */
+.vc-bar{position:fixed;top:0;left:0;right:0;z-index:500;background:linear-gradient(135deg,#064e3b,#065f46);padding:10px 20px;display:none;align-items:center;justify-content:space-between;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.vc-bar.active{display:flex}
+.vc-bar-left{display:flex;align-items:center;gap:10px}
+.vc-bar-dot{width:8px;height:8px;border-radius:50%;background:#34d399;animation:vcPulse .8s infinite}
+.vc-bar-txt{font-size:13px;font-weight:600;color:#ecfdf5}
+.vc-bar-sub{font-size:11px;color:#6ee7b7;margin-top:1px}
+.vc-waves{display:flex;align-items:center;gap:3px;height:24px}
+.vc-wave{width:3px;background:#34d399;border-radius:2px;animation:waveAnim 0.8s infinite ease-in-out}
+.vc-wave:nth-child(1){animation-delay:0s}.vc-wave:nth-child(2){animation-delay:.1s}
+.vc-wave:nth-child(3){animation-delay:.2s}.vc-wave:nth-child(4){animation-delay:.3s}
+.vc-wave:nth-child(5){animation-delay:.2s}.vc-wave:nth-child(6){animation-delay:.1s}
+@keyframes waveAnim{0%,100%{height:4px}50%{height:20px}}
+.vc-end-btn{background:var(--red);border:none;color:#fff;padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)}
 @keyframes mic-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,71,87,.4)}50%{box-shadow:0 0 0 8px rgba(255,71,87,0)}}
 .send-btn{width:34px;height:34px;border-radius:9px;border:none;background:linear-gradient(135deg,var(--ac),#0ea5e9);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;box-shadow:0 2px 10px rgba(16,185,129,.3)}
 .send-btn:hover{background:var(--ac2);transform:scale(1.05)}
@@ -377,6 +400,67 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 @supports(padding-bottom: env(safe-area-inset-bottom)){
   .inp-area{padding-bottom:calc(10px + env(safe-area-inset-bottom))!important}
 }
+
+/* ── Attachment + Button ── */
+.plus-btn{width:28px;height:28px;border-radius:8px;border:1.5px solid var(--b2);background:transparent;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.plus-btn:hover{background:var(--card2);color:var(--t1);border-color:var(--t3)}
+.plus-btn.open{transform:rotate(45deg);border-color:var(--ac);color:var(--ac)}
+.plus-menu{position:absolute;bottom:calc(100% + 6px);left:12px;background:var(--card);border:1px solid var(--b);border-radius:14px;padding:6px;min-width:210px;z-index:300;box-shadow:0 16px 40px rgba(0,0,0,.45);animation:pmPop .16s ease}
+@keyframes pmPop{from{opacity:0;transform:translateY(6px) scale(.96)}to{opacity:1;transform:none}}
+.plus-item{display:flex;align-items:center;gap:10px;padding:10px 11px;border-radius:9px;cursor:pointer;transition:background .12s;color:var(--t1)}
+.plus-item:hover{background:var(--card2)}
+.plus-item span{font-size:13px;font-weight:500}
+.plus-ic{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.att-bar{padding:6px 16px 0;display:flex;flex-wrap:wrap;gap:8px}
+.att-chip{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--b);border-radius:9px;padding:6px 9px;font-size:12px;color:var(--t1)}
+.att-chip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px;color:var(--t2);font-size:11px}
+.att-chip-del{width:16px;height:16px;border-radius:50%;background:var(--b2);border:none;color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0}
+.att-chip-del:hover{background:var(--red);color:#fff}
+.att-img-th{width:36px;height:36px;border-radius:5px;object-fit:cover;flex-shrink:0}
+
+/* ══ Voice Agent — ChatGPT Style ══ */
+#vaOverlay{display:none}
+#vaOverlay.va-open{display:flex!important}
+
+.va-orb-wrap{position:relative;width:140px;height:140px;display:flex;align-items:center;justify-content:center}
+.va-orb{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,#10b981,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;position:relative;z-index:2;transition:all .4s}
+.va-orb.va-listening{background:linear-gradient(135deg,#ef4444,#f59e0b);animation:orbBreath .6s infinite alternate}
+.va-orb.va-speaking{background:linear-gradient(135deg,#10b981,#0ea5e9);animation:orbBreath .4s infinite alternate}
+.va-orb.va-thinking{background:linear-gradient(135deg,#6366f1,#8b5cf6);animation:orbSpin 2s linear infinite}
+@keyframes orbBreath{from{transform:scale(1)}to{transform:scale(1.12)}}
+@keyframes orbSpin{to{filter:hue-rotate(360deg)}}
+.va-orb-inner{font-size:36px;font-weight:800;color:#fff;letter-spacing:-1px;z-index:3}
+.va-ring{position:absolute;border-radius:50%;border:1.5px solid rgba(16,185,129,.3);animation:vaRingPulse 2s infinite}
+.va-ring1{width:120px;height:120px;animation-delay:0s}
+.va-ring2{width:145px;height:145px;animation-delay:.4s;border-color:rgba(59,130,246,.2)}
+.va-ring3{width:170px;height:170px;animation-delay:.8s;border-color:rgba(139,92,246,.15)}
+@keyframes vaRingPulse{0%{transform:scale(.9);opacity:0}50%{opacity:1}100%{transform:scale(1.1);opacity:0}}
+
+.va-status{font-size:20px;font-weight:600;color:#fff;margin-bottom:6px;transition:all .3s}
+.va-transcript{font-size:14px;color:#6b7280;max-width:280px;text-align:center;line-height:1.6;min-height:40px;transition:all .3s}
+
+.va-waves{display:flex;align-items:center;gap:4px;height:48px;transition:opacity .3s}
+.va-w{width:4px;background:linear-gradient(to top,#10b981,#3b82f6);border-radius:2px;animation:vaWave .8s infinite ease-in-out}
+.va-w:nth-child(1){animation-delay:0s}.va-w:nth-child(2){animation-delay:.1s}
+.va-w:nth-child(3){animation-delay:.2s}.va-w:nth-child(4){animation-delay:.3s}
+.va-w:nth-child(5){animation-delay:.2s}.va-w:nth-child(6){animation-delay:.1s}
+.va-w:nth-child(7){animation-delay:0s}
+@keyframes vaWave{0%,100%{height:6px}50%{height:40px}}
+
+.va-end-btn{display:flex;align-items:center;gap:8px;background:rgba(239,68,68,.15);border:1.5px solid rgba(239,68,68,.4);color:#ef4444;padding:13px 28px;border-radius:40px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--font);transition:all .2s}
+.va-end-btn:hover{background:rgba(239,68,68,.25);border-color:#ef4444}
+
+/* Voice Call Button in input bar */
+.voice-call-btn{width:34px;height:34px;border-radius:50%;border:none;background:transparent;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.voice-call-btn:hover{background:var(--card2);color:var(--t1)}
+.voice-call-btn.vc-on{background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 0 14px rgba(16,185,129,.5);animation:vcPulse 1.5s infinite}
+@keyframes vcPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+
+/* ── Follow-up Suggestions ── */
+.followup-wrap{display:flex;flex-wrap:wrap;gap:7px;padding:6px 0 4px 44px;animation:fadeUp .3s ease}
+.followup-chip{background:var(--card);border:1px solid var(--b);border-radius:20px;padding:7px 14px;font-size:12.5px;color:var(--t2);cursor:pointer;transition:all .18s;white-space:nowrap;font-family:var(--font);line-height:1}
+.followup-chip:hover{background:var(--card2);border-color:var(--ac);color:var(--t1);transform:translateY(-1px)}
+.followup-chip:active{transform:scale(.96)}
 </style>
 </head>
 <body>
@@ -550,18 +634,50 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
       </div>
       <div class="msgs" id="msgs"></div>
     </div>
-    <div class="inp-area">
+    <!-- Attachment preview bar -->
+    <div class="att-bar" id="attBar" style="display:none"></div>
+    <div class="inp-area" style="position:relative">
+      <!-- + Popup Menu -->
+      <div class="plus-menu" id="plusMenu" style="display:none">
+        <div class="plus-item" onclick="triggerAtt('image')">
+          <div class="plus-ic" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">🖼️</div>
+          <span>Gallery se photo</span>
+        </div>
+        <div class="plus-item" onclick="triggerAtt('camera')">
+          <div class="plus-ic" style="background:linear-gradient(135deg,#10b981,#059669)">📷</div>
+          <span>Camera se photo</span>
+        </div>
+        <div class="plus-item" onclick="triggerAtt('file')">
+          <div class="plus-ic" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">📄</div>
+          <span>File / Document</span>
+        </div>
+        <div class="plus-item" onclick="triggerAtt('pdf')">
+          <div class="plus-ic" style="background:linear-gradient(135deg,#ef4444,#dc2626)">📕</div>
+          <span>PDF upload karo</span>
+        </div>
+      </div>
+      <!-- Hidden file inputs -->
+      <input type="file" id="fi_img" accept="image/*" style="display:none" onchange="handleAtt(this,'image')">
+      <input type="file" id="fi_cam" accept="image/*" capture="environment" style="display:none" onchange="handleAtt(this,'image')">
+      <input type="file" id="fi_doc" accept=".txt,.csv,.json,.md,.html,.js,.py,.doc,.docx,.xls,.xlsx" style="display:none" onchange="handleAtt(this,'file')">
+      <input type="file" id="fi_pdf" accept=".pdf" style="display:none" onchange="handleAtt(this,'pdf')">
+
       <div class="inp-box">
+        <button class="plus-btn" id="plusBtn" onclick="togglePlusMenu()" title="Attach">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
         <textarea class="chat-inp" id="chatInp" placeholder="Perry se kuch bhi poochho..." rows="1"
           onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
         <div class="inp-btns">
-          <button class="ibt" id="micBtn" onclick="toggleMic()" title="Voice input">🎤</button>
+          <button class="voice-call-btn" id="voiceCallBtn" onclick="toggleVoiceCall()" title="Voice se baat karo">
+            <svg id="vcIcon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          </button>
           <button class="send-btn" id="sendBtn" onclick="sendMsg()">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
           </button>
         </div>
       </div>
-      <div class="inp-hint" id="inpHint">PerryAI • Auto AI • Hindi / Hinglish / English</div>
+      <div class="inp-hint" id="inpHint">PerryAI • Hindi/Hinglish/English</div>
     </div>
   </div>
 </div>
@@ -814,9 +930,9 @@ function showScreen(id){
   document.querySelectorAll('.screen').forEach(s=>{s.classList.remove('active');s.style.display='none';});
   const sc=document.getElementById(id);
   if(!sc){console.error('Screen not found:',id);return;}
-  sc.style.display='flex';
+  if(id==='userApp'){sc.style.display='flex';sc.style.flexDirection='row';}
+  else sc.style.display='flex';
   sc.classList.add('active');
-  setTimeout(()=>sc.classList.add('active'),10);
 }
 
 // ════════════════════════════════════════════════════════
@@ -1344,31 +1460,99 @@ function handleGoogle(resp){
 // CHAT ENGINE
 // ════════════════════════════════════════════════════════
 function sq(t){document.getElementById('chatInp').value=t;sendMsg();}
-function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMsg();}}
+function handleKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){
+    e.preventDefault();
+    // Stop mic if running before send
+    if(micOn&&rec){rec.stop();micOn=false;const b=document.getElementById('micBtn');if(b){b.classList.remove('mic-on');}}
+    sendMsg();
+  }
+}
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,160)+'px';}
+
+
+// ── Attachment System ──
+let attachments=[];
+function togglePlusMenu(){
+  const m=document.getElementById('plusMenu');
+  const b=document.getElementById('plusBtn');
+  const open=m.style.display==='flex';
+  m.style.display=open?'none':'flex';
+  m.style.flexDirection='column';
+  b.classList.toggle('open',!open);
+  if(!open)setTimeout(()=>document.addEventListener('click',function h(e){
+    if(!m.contains(e.target)&&e.target!==b){m.style.display='none';b.classList.remove('open');}
+    document.removeEventListener('click',h);
+  }),50);
+}
+function triggerAtt(t){
+  document.getElementById('plusMenu').style.display='none';
+  document.getElementById('plusBtn').classList.remove('open');
+  if(t==='image')document.getElementById('fi_img').click();
+  else if(t==='camera')document.getElementById('fi_cam').click();
+  else if(t==='file')document.getElementById('fi_doc').click();
+  else document.getElementById('fi_pdf').click();
+}
+function handleAtt(input,type){
+  const file=input.files[0];if(!file)return;input.value='';
+  if(file.size>5*1024*1024){showToast('❌ File too big! Max 5MB');return;}
+  if(type==='image'){
+    const r=new FileReader();
+    r.onload=e=>{attachments.push({type:'image',name:file.name,preview:e.target.result});renderAttBar();};
+    r.readAsDataURL(file);
+  } else {
+    const r=new FileReader();
+    r.onload=e=>{attachments.push({type:'file',name:file.name,content:e.target.result,preview:null});renderAttBar();};
+    r.readAsText(file);
+  }
+}
+function renderAttBar(){
+  const bar=document.getElementById('attBar');
+  if(!attachments.length){bar.style.display='none';bar.innerHTML='';return;}
+  bar.style.display='flex';
+  bar.innerHTML=attachments.map((a,i)=>`<div class="att-chip">
+    ${a.type==='image'?`<img src="${a.preview}" class="att-img-th">`:'<span>📄</span>'}
+    <span class="att-chip-name">${a.name}</span>
+    <button class="att-chip-del" onclick="removeAtt(${i})">×</button>
+  </div>`).join('');
+}
+function removeAtt(i){attachments.splice(i,1);renderAttBar();}
 
 async function sendMsg(){
   const el=document.getElementById('chatInp');
   const text=el.value.trim();
-  if(!text||generating)return;
+  if((!text&&!attachments.length)||generating)return;
+  // Build prompt with attachments
+  let fullText=text;
+  if(attachments.length){
+    const attCtx=attachments.map(a=>
+      a.type==='image'?`[User ne image share ki: ${a.name}. Perry, user se image describe karne ko kaho ya questions poochho.]`
+      :`\n--- FILE: ${a.name} ---\n${(a.content||'').substring(0,3000)}\n--- END ---`
+    ).join('\n');
+    fullText=text?text+'\n\n'+attCtx:attCtx;
+  }
+  const dispText=text+(attachments.length?' '+attachments.map(a=>a.type==='image'?'📷 '+a.name:'📄 '+a.name).join(' '):'');
+  attachments=[];renderAttBar();
   if(!getAvail().length){
-    renderMsg('ai','⚠️ PerryAI abhi setup ho raha hai — thodi der baad try karo ya admin se contact karo!');
+    {renderMsg('ai','⚠️ PerryAI abhi setup ho raha hai — thodi der baad try karo ya admin se contact karo!')}
     return;
   }
   el.value='';el.style.height='auto';
   document.getElementById('welcome').style.display='none';
-  chatMsgs.push({role:'user',content:text});
-  renderMsg('user',text);
-  saveHistEntry(text);
-  autoMemory(text);
+  chatMsgs.push({role:'user',content:fullText});
+  renderMsg('user',dispText);
+  saveHistEntry(dispText);
+  autoMemory(text||dispText);
   const tid=showTyping();
   generating=true;
   document.getElementById('sendBtn').disabled=true;
   try{
     const reply=await smartCall(chatMsgs.slice(-16));
     chatMsgs.push({role:'assistant',content:reply});
-    const msgId=renderMsg('ai',reply);
+    const {id:msgId}=renderMsg('ai',reply);
     saveHistMsgs();
+    // Generate follow-up suggestions
+    setTimeout(()=>generateFollowups(reply),400);
     // Auto-speak if voice mode active
     if(perryVoice.enabled){
       setTimeout(()=>{
@@ -1388,7 +1572,7 @@ async function sendMsg(){
     else if(em.includes('402')||em.includes('Insufficient'))hint=' ⚠️ Credit khatam!';
     else if(em.includes('CORS')||em.includes('Failed to fetch'))hint=' ⚠️ Network error — Groq ya Gemini key daalo (sidebar > gear icon)';
     else if(em.includes('Empty')||em.includes('No response'))hint=' — Retry karo.';
-    renderMsg('ai','❌ '+em+hint);
+    {renderMsg('ai','❌ '+em+hint);}
   }
   removeTyping(tid);
   generating=false;
@@ -1412,7 +1596,7 @@ function renderMsg(role,text){
     :`${avHtml}<div class="mc"><div class="mb" id="${id}">${fmt(text)}</div><div class="macts"><button class="mact" onclick="copyMsg('${id}')">📋 Copy</button><button class="mact" onclick="speakMsg('${id}')">🔊 Suno</button></div></div>`;
   wrap.appendChild(div);
   const ca=document.getElementById("chatArea");if(ca)ca.scrollTop=ca.scrollHeight;
-  return id;
+  return {id, wrap, div};
 }
 
 function fmt(t){
@@ -1558,7 +1742,7 @@ function initPerryVoice(){
   if(!SR){console.log('SR not supported');return;}
   loadBestVoice();
   // Show voice FAB button
-  document.getElementById('voiceFab').style.display='flex';
+  // Voice FAB removed - now integrated in input bar
 }
 
 function loadBestVoice(){
@@ -1764,6 +1948,204 @@ function perrySpeak(text, onDone){
 }
 
 // ── Toggle Voice Mode ────────────────────────────────────
+
+
+// ════════════════════════════════════════════════════════
+// FOLLOW-UP SUGGESTIONS
+// ════════════════════════════════════════════════════════
+function removeOldFollowups(){
+  document.querySelectorAll('.followup-wrap').forEach(el=>el.remove());
+}
+
+async function generateFollowups(aiReply){
+  removeOldFollowups(); // remove previous suggestions
+  
+  // Get last user message for context
+  const lastUser = chatMsgs.filter(m=>m.role==='user').slice(-1)[0]?.content||'';
+  
+  // Build prompt for generating suggestions
+  const prompt = `Based on this conversation:
+User: ${lastUser.substring(0,200)}
+AI: ${aiReply.substring(0,300)}
+
+Generate exactly 3 short follow-up questions the user might want to ask next. 
+Rules:
+- Each question max 8 words
+- In same language as conversation (Hindi/English/Hinglish)  
+- Relevant and useful
+- No numbering, no bullets
+- Return ONLY the 3 questions, one per line, nothing else`;
+
+  try{
+    const msgs=[{role:'user',content:prompt}];
+    const raw = await smartCall(msgs);
+    const lines = raw.split('\n').map(l=>l.trim()).filter(l=>l.length>3&&l.length<80).slice(0,3);
+    if(lines.length<1) return;
+    
+    // Render chips below last AI message
+    const wrap=document.getElementById('msgs');
+    const chipWrap=document.createElement('div');
+    chipWrap.className='followup-wrap';
+    chipWrap.innerHTML=lines.map(q=>
+      `<button class="followup-chip" onclick="useFollowup(this,'${q.replace(/'/g,"\'")}')">💬 ${q}</button>`
+    ).join('');
+    wrap.appendChild(chipWrap);
+    const ca=document.getElementById('chatArea');
+    if(ca)ca.scrollTop=ca.scrollHeight;
+  }catch(e){
+    // Silent fail - suggestions are optional
+  }
+}
+
+function useFollowup(btn, question){
+  // Remove all followup chips
+  removeOldFollowups();
+  // Put question in input and send
+  const inp=document.getElementById('chatInp');
+  if(inp){inp.value=question;autoResize(inp);}
+  sendMsg();
+}
+
+// ════════════════════════════════════════════════════════
+// VOICE AGENT — ChatGPT Style (Full Screen)
+// ════════════════════════════════════════════════════════
+let vaActive=false, vaRec=null, vaSpeaking=false, vaMode='idle';
+
+function toggleVoiceCall(){
+  if(vaActive) endVoiceAgent();
+  else startVoiceAgent();
+}
+
+function startVoiceAgent(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){showToast('❌ Chrome browser mein kaam karta hai!');return;}
+  vaActive=true;
+  
+  // Show overlay
+  const ov=document.getElementById('vaOverlay');
+  ov.style.display='flex';
+  ov.style.flexDirection='column';
+  
+  // Button glow
+  document.getElementById('voiceCallBtn').classList.add('vc-on');
+  
+  vaSetState('listening');
+  vaListen();
+}
+
+function vaSetState(state){
+  vaMode=state;
+  const orb=document.getElementById('vaOrb');
+  const status=document.getElementById('vaStatus');
+  const waves=document.getElementById('vaWaves');
+  
+  orb.className='va-orb';
+  if(state==='listening'){
+    orb.classList.add('va-listening');
+    status.textContent='Sun raha hun...';
+    waves.style.opacity='1';
+  } else if(state==='speaking'){
+    orb.classList.add('va-speaking');
+    status.textContent='Perry bol raha hai';
+    waves.style.opacity='0.4';
+  } else if(state==='thinking'){
+    orb.classList.add('va-thinking');
+    status.textContent='Soch raha hun...';
+    waves.style.opacity='0';
+  } else {
+    status.textContent='Taiyaar hun';
+    waves.style.opacity='0';
+  }
+}
+
+function vaListen(){
+  if(!vaActive)return;
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(vaRec){try{vaRec.stop();}catch(e){}}
+  
+  vaRec=new SR();
+  vaRec.lang='hi-IN';
+  vaRec.continuous=false;
+  vaRec.interimResults=true;
+  vaSetState('listening');
+  
+  let finalText='';
+  vaRec.onresult=e=>{
+    let interim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal) finalText+=e.results[i][0].transcript;
+      else interim+=e.results[i][0].transcript;
+    }
+    const t=document.getElementById('vaTranscript');
+    if(t) t.textContent=finalText||interim||'Bol raha hun...';
+  };
+  
+  vaRec.onend=()=>{
+    if(!vaActive)return;
+    const txt=(finalText||'').trim();
+    if(txt.length>1){
+      vaSetState('thinking');
+      document.getElementById('vaTranscript').textContent=txt;
+      vaSendAndReply(txt);
+    } else {
+      document.getElementById('vaTranscript').textContent='Kuch sunai nahi diya, dobara boliye...';
+      setTimeout(()=>{if(vaActive)vaListen();},800);
+    }
+  };
+  vaRec.onerror=(e)=>{
+    if(!vaActive)return;
+    setTimeout(()=>{if(vaActive)vaListen();},600);
+  };
+  try{vaRec.start();}catch(e){}
+}
+
+async function vaSendAndReply(text){
+  // Show in chat (hidden, in background)
+  document.getElementById('welcome').style.display='none';
+  chatMsgs.push({role:'user',content:text});
+  renderMsg('user',text);
+  saveHistEntry(text);
+  autoMemory(text);
+  
+  const tid=showTyping();
+  generating=true;
+  try{
+    const reply=await smartCall(chatMsgs.slice(-16));
+    chatMsgs.push({role:'assistant',content:reply});
+    {renderMsg('ai',reply);}
+    saveHistMsgs();
+    
+    // Speak reply
+    vaSetState('speaking');
+    const clean=reply.replace(/[*_#`]/g,'').replace(/\n/g,' ').replace(/  +/g,' ').substring(0,600);
+    document.getElementById('vaTranscript').textContent=clean.substring(0,80)+(clean.length>80?'...':'');
+    
+    perrySpeak(clean,()=>{
+      if(vaActive){
+        document.getElementById('vaTranscript').textContent='Ab aap boliye...';
+        setTimeout(()=>{if(vaActive)vaListen();},500);
+      }
+    });
+  }catch(e){
+    {renderMsg('ai','❌ '+e.message);}
+    if(vaActive)setTimeout(()=>vaListen(),1000);
+  }
+  removeTyping(tid);
+  generating=false;
+}
+
+function endVoiceAgent(){
+  vaActive=false;
+  if(vaRec){try{vaRec.stop();}catch(e){} vaRec=null;}
+  if(speechSynthesis.speaking) speechSynthesis.cancel();
+  generating=false;
+  
+  document.getElementById('vaOverlay').style.display='none';
+  document.getElementById('voiceCallBtn').classList.remove('vc-on');
+  showToast('Voice agent band kiya');
+}
+
+
 function toggleVoiceMode(){
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){showToast('❌ Chrome browser mein use karo!');return;}
@@ -1996,11 +2378,36 @@ function showToast(m){
   </div>
 </div>
 
-<!-- Perry Voice FAB -->
-<button class="voice-fab" id="voiceFab" onclick="toggleVoiceMode()" title="Perry Voice" style="display:none">
-  <div class="voice-ring" id="voiceRing"></div>
-  <span id="voiceFabIcon">🎙️</span>
-</button>
+
+<!-- ══ ChatGPT Style Voice Agent ══ -->
+<div id="vaOverlay" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(10,10,10,.97);flex-direction:column;align-items:center;justify-content:center;gap:32px">
+  <!-- Animated Orb -->
+  <div class="va-orb-wrap">
+    <div class="va-orb" id="vaOrb">
+      <div class="va-orb-inner">P</div>
+    </div>
+    <div class="va-ring va-ring1"></div>
+    <div class="va-ring va-ring2"></div>
+    <div class="va-ring va-ring3"></div>
+  </div>
+  <!-- Status text -->
+  <div style="text-align:center">
+    <div class="va-status" id="vaStatus">Taiyaar hun...</div>
+    <div class="va-transcript" id="vaTranscript">Bolo, main sun raha hun</div>
+  </div>
+  <!-- Wave bars (show when listening) -->
+  <div class="va-waves" id="vaWaves" style="opacity:0">
+    <div class="va-w"></div><div class="va-w"></div><div class="va-w"></div>
+    <div class="va-w"></div><div class="va-w"></div><div class="va-w"></div>
+    <div class="va-w"></div>
+  </div>
+  <!-- End button -->
+  <button class="va-end-btn" onclick="endVoiceAgent()">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+    Band karo
+  </button>
+</div>
+
 <div class="voice-status" id="voiceStatus"></div>
 
 </body>
