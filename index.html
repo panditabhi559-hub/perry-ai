@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-title" content="PerryAI">
 <meta name="theme-color" content="#0a0a0a">
 <link rel="manifest" id="pwaManifest">
-<title>PerryAI v2.3</title>
+<title>PerryAI v2.4</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
@@ -282,8 +282,27 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 .mrow.ai .mb{background:var(--card);border:1px solid var(--b);border-bottom-left-radius:3px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
 .mb strong{font-weight:700}
 .mb em{opacity:.8}
-.mb code{background:rgba(0,0,0,.4);border-radius:5px;padding:1px 6px;font-size:12px;font-family:var(--mono)}
-.mb pre{background:#0a0a0a;border:1px solid var(--b);border-radius:9px;padding:13px;overflow-x:auto;margin:9px 0;font-size:12px;font-family:var(--mono);line-height:1.7}
+
+/* Code block wrapper */
+.cbw,.code-block-wrap{border-radius:12px;overflow:hidden;border:1px solid #2d2f3e;margin:10px 0}
+body.light .cbw,.code-block-wrap{border-color:#e2e8f0}
+.mb code{background:rgba(255,255,255,.08);border-radius:5px;padding:2px 7px;font-size:12.5px;font-family:var(--mono);color:#e2e8f0}
+body.light 
+/* Code block wrapper */
+.cbw,.code-block-wrap{border-radius:12px;overflow:hidden;border:1px solid #2d2f3e;margin:10px 0}
+body.light .cbw,.code-block-wrap{border-color:#e2e8f0}
+.mb code{background:rgba(0,0,0,.08);color:#1e293b}
+.mb pre,.cbw pre{background:#1a1b26;border-radius:0 0 12px 12px;overflow-x:auto;margin:0;padding:16px}
+.mb pre code,.cbw pre code{background:none!important;padding:0!important;font-size:13px!important;font-family:var(--mono)!important;line-height:1.7!important;color:#abb2bf!important;border-radius:0;white-space:pre}
+
+/* Code block header */
+.code-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:#252636;border-bottom:1px solid #2d2f3e;font-size:11.5px}
+body.light .code-hdr{background:#f0f0f5;border-color:#e2e8f0}
+.code-lang{color:#a0aec0;font-family:var(--mono);font-weight:600;text-transform:uppercase;letter-spacing:.5px;font-size:11px}
+body.light .code-lang{color:#64748b}
+.code-copy-btn{background:transparent;border:1px solid #3d3f52;border-radius:6px;color:#a0aec0;padding:3px 10px;font-size:11px;cursor:pointer;font-family:var(--font);transition:all .15s;display:flex;align-items:center;gap:5px}
+.code-copy-btn:hover{background:#2d2f3e;color:#e2e8f0}
+.code-copy-btn.copied{color:#10b981;border-color:rgba(16,185,129,.4)}
 .macts{display:flex;gap:3px;margin-top:5px;opacity:0;transition:opacity .2s}
 .mrow:hover .macts{opacity:1}
 .mact{background:none;border:none;color:var(--t3);cursor:pointer;font-size:12px;padding:3px 8px;border-radius:5px;transition:all .15s;font-family:var(--font)}
@@ -298,22 +317,25 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 @keyframes ta{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-5px);opacity:1}}
 
 /* Input */
-.inp-area{padding:10px max(12px,calc(50% - 380px)) 16px;flex-shrink:0}
-.inp-box{background:var(--card);border:1px solid var(--b);border-radius:16px;display:flex;align-items:flex-end;gap:6px;padding:11px 10px 11px 17px;transition:border-color .2s,box-shadow .2s;box-shadow:0 2px 8px rgba(0,0,0,.2)}
-.inp-box:focus-within{border-color:rgba(16,185,129,.4);box-shadow:0 0 0 3px rgba(16,185,129,.08),0 4px 16px rgba(0,0,0,.3)}
-.chat-inp{flex:1;background:none;border:none;outline:none;color:var(--t1);font-size:14px;font-family:var(--font);resize:none;max-height:160px;min-height:22px;line-height:1.65;padding:1px 0}
-.chat-inp::placeholder{color:var(--t3)}
+.inp-area{padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));flex-shrink:0;background:transparent}
+.inp-box{background:#1c1c1e;border:1.5px solid #3a3a3c;border-radius:28px;display:flex;align-items:flex-end;gap:0;padding:6px 6px 6px 6px;transition:border-color .2s}
+body.light .inp-box{background:#f0f0f0;border-color:#d1d1d6}
+.inp-box:focus-within{border-color:#5a5a5e}
+.chat-inp{flex:1;background:none;border:none;outline:none;color:var(--t1);font-size:16px;font-family:var(--font);resize:none;max-height:160px;min-height:24px;line-height:1.6;padding:6px 10px}
+.chat-inp::placeholder{color:#636366}
+body.light .chat-inp::placeholder{color:#8e8e93}
 .inp-btns{display:flex;align-items:center;gap:2px;flex-shrink:0}
 .ibt{width:32px;height:32px;border-radius:8px;border:none;background:transparent;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .15s}
 .ibt:hover{background:var(--card2);color:var(--t2)}
 .ibt.mic-on{background:var(--red);color:#fff;animation:mic-pulse .8s infinite}
 
 /* Voice Call Button */
-.voice-call-btn{width:34px;height:34px;border-radius:50%;border:none;background:transparent;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
-.voice-call-btn:hover{background:var(--card2);color:var(--t1)}
-.voice-call-btn.vc-active{background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 0 18px rgba(16,185,129,.5);animation:vcPulse 1.5s infinite}
-.voice-call-btn.vc-listening{background:linear-gradient(135deg,var(--red),#e11d48);color:#fff;box-shadow:0 0 18px rgba(239,68,68,.5);animation:vcPulse .8s infinite}
-.voice-call-btn.vc-thinking{background:linear-gradient(135deg,#3b82f6,#6366f1);color:#fff}
+.voice-call-btn{width:36px;height:36px;border-radius:50%;border:none;background:#636366;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
+.voice-call-btn:hover{background:#8e8e93}
+.voice-call-btn.vc-active{background:#10b981;box-shadow:0 0 14px rgba(16,185,129,.5)}
+.voice-call-btn.vc-listening{background:#ef4444;box-shadow:0 0 14px rgba(239,68,68,.5);animation:vcPulse .8s infinite}
+.voice-call-btn.vc-thinking{background:#3b82f6}
+.voice-call-btn.vc-on{background:#ef4444;box-shadow:0 0 14px rgba(239,68,68,.4)}
 @keyframes vcPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
 
 /* Voice Call Overlay Bar */
@@ -331,9 +353,10 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 @keyframes waveAnim{0%,100%{height:4px}50%{height:20px}}
 .vc-end-btn{background:var(--red);border:none;color:#fff;padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font)}
 @keyframes mic-pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,71,87,.4)}50%{box-shadow:0 0 0 8px rgba(255,71,87,0)}}
-.send-btn{width:34px;height:34px;border-radius:9px;border:none;background:linear-gradient(135deg,var(--ac),#0ea5e9);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;box-shadow:0 2px 10px rgba(16,185,129,.3)}
-.send-btn:hover{background:var(--ac2);transform:scale(1.05)}
-.send-btn:disabled{opacity:.3;cursor:not-allowed;transform:none}
+.send-btn{width:36px;height:36px;border-radius:50%;border:none;background:#fff;color:#000;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+body.light .send-btn{background:#1c1c1e;color:#fff}
+.send-btn:hover{transform:scale(1.05)}
+.send-btn:disabled{opacity:.25;cursor:not-allowed;transform:none}
 .inp-hint{text-align:center;font-size:10.5px;color:var(--t3);margin-top:7px;letter-spacing:.1px}
 
 /* Keys Modal */
@@ -384,7 +407,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
     border-top:1px solid var(--b)!important;
     z-index:50!important;
   }
-  .inp-box{border-radius:14px!important;padding:10px 8px 10px 14px!important}
+  .inp-box{border-radius:28px!important;padding:6px!important}
   .chat-inp{font-size:16px!important} /* Prevents zoom on iOS */
   
   /* Top bar */
@@ -417,16 +440,36 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
   .inp-area{padding-bottom:calc(10px + env(safe-area-inset-bottom))!important}
 }
 
-/* ── Attachment + Button ── */
-.plus-btn{width:28px;height:28px;border-radius:8px;border:1.5px solid var(--b2);background:transparent;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
-.plus-btn:hover{background:var(--card2);color:var(--t1);border-color:var(--t3)}
-.plus-btn.open{transform:rotate(45deg);border-color:var(--ac);color:var(--ac)}
-.plus-menu{position:absolute;bottom:calc(100% + 6px);left:12px;background:var(--card);border:1px solid var(--b);border-radius:14px;padding:6px;min-width:210px;z-index:300;box-shadow:0 16px 40px rgba(0,0,0,.45);animation:pmPop .16s ease}
-@keyframes pmPop{from{opacity:0;transform:translateY(6px) scale(.96)}to{opacity:1;transform:none}}
-.plus-item{display:flex;align-items:center;gap:10px;padding:10px 11px;border-radius:9px;cursor:pointer;transition:background .12s;color:var(--t1)}
-.plus-item:hover{background:var(--card2)}
-.plus-item span{font-size:13px;font-weight:500}
-.plus-ic{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+/* ── ChatGPT-style + Button & Menu ── */
+.plus-btn{width:34px;height:34px;border-radius:50%;border:none;background:transparent;color:#8e8e93;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;padding:0;margin-right:0}
+.plus-btn:hover{color:var(--t1)}
+.plus-btn.open{transform:rotate(45deg);color:var(--t1)}
+
+/* Menu container */
+.plus-menu{position:absolute;bottom:calc(100% + 10px);left:0;background:#1c1c1e;border:1px solid #2c2c2e;border-radius:18px;padding:12px;width:300px;z-index:300;box-shadow:0 24px 60px rgba(0,0,0,.6);animation:pmPop .18s cubic-bezier(.4,0,.2,1)}
+body.light .plus-menu{background:#f2f2f7;border-color:#e0e0e5}
+@keyframes pmPop{from{opacity:0;transform:translateY(8px) scale(.95)}to{opacity:1;transform:none}}
+
+/* Top 3 big buttons */
+.plus-top-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:4px}
+.plus-big-btn{background:#2c2c2e;border-radius:14px;padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:background .15s;color:var(--t1)}
+body.light .plus-big-btn{background:#e5e5ea}
+.plus-big-btn:hover{background:#3a3a3c}
+body.light .plus-big-btn:hover{background:#d1d1d6}
+.plus-big-btn span{font-size:12px;font-weight:500;color:var(--t1)}
+
+.plus-divider{height:1px;background:#2c2c2e;margin:8px 0}
+body.light .plus-divider{background:#e0e0e5}
+
+/* Feature rows */
+.plus-feat{display:flex;align-items:center;gap:12px;padding:10px 8px;border-radius:10px;cursor:pointer;transition:background .12s}
+.plus-feat:hover{background:rgba(255,255,255,.06)}
+body.light .plus-feat:hover{background:rgba(0,0,0,.05)}
+.plus-feat-ic{width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.plus-feat-title{font-size:13.5px;font-weight:500;color:var(--t1)}
+.plus-feat-sub{font-size:11.5px;color:var(--t3);margin-top:1px}
+
+/* Attachment chips */
 .att-bar{padding:6px 16px 0;display:flex;flex-wrap:wrap;gap:8px}
 .att-chip{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--b);border-radius:9px;padding:6px 9px;font-size:12px;color:var(--t1)}
 .att-chip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px;color:var(--t2);font-size:11px}
@@ -467,8 +510,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 .va-end-btn:hover{background:rgba(239,68,68,.25);border-color:#ef4444}
 
 /* Voice Call Button in input bar */
-.voice-call-btn{width:34px;height:34px;border-radius:50%;border:none;background:transparent;color:var(--t3);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0}
-.voice-call-btn:hover{background:var(--card2);color:var(--t1)}
+/* voice-call-btn defined above */
 .voice-call-btn.vc-on{background:linear-gradient(135deg,#10b981,#059669);color:#fff;box-shadow:0 0 14px rgba(16,185,129,.5);animation:vcPulse 1.5s infinite}
 @keyframes vcPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 
@@ -477,6 +519,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 .followup-chip{background:var(--card);border:1px solid var(--b);border-radius:20px;padding:7px 14px;font-size:12.5px;color:var(--t2);cursor:pointer;transition:all .18s;white-space:nowrap;font-family:var(--font);line-height:1}
 .followup-chip:hover{background:var(--card2);border-color:var(--ac);color:var(--t1);transform:translateY(-1px)}
 .followup-chip:active{transform:scale(.96)}
+
 </style>
 </head>
 <body>
@@ -661,23 +704,66 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
     <!-- Attachment preview bar -->
     <div class="att-bar" id="attBar" style="display:none"></div>
     <div class="inp-area" style="position:relative">
-      <!-- + Popup Menu -->
+      <!-- ChatGPT-style + Popup Menu -->
       <div class="plus-menu" id="plusMenu" style="display:none">
-        <div class="plus-item" onclick="triggerAtt('image')">
-          <div class="plus-ic" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">🖼️</div>
-          <span>Gallery se photo</span>
+        <!-- Top: Camera / Photos / Files -->
+        <div class="plus-top-row">
+          <div class="plus-big-btn" onclick="triggerAtt('camera')">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <span>Camera</span>
+          </div>
+          <div class="plus-big-btn" onclick="triggerAtt('image')">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <span>Photos</span>
+          </div>
+          <div class="plus-big-btn" onclick="triggerAtt('file')">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+            <span>Files</span>
+          </div>
         </div>
-        <div class="plus-item" onclick="triggerAtt('camera')">
-          <div class="plus-ic" style="background:linear-gradient(135deg,#10b981,#059669)">📷</div>
-          <span>Camera se photo</span>
+        <div class="plus-divider"></div>
+        <!-- Feature list -->
+        <div class="plus-feat" onclick="sq('Ek creative image banao: ')">
+          <div class="plus-feat-ic" style="color:#4ade80">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          </div>
+          <div><div class="plus-feat-title">Create image</div><div class="plus-feat-sub">Visualize anything</div></div>
         </div>
-        <div class="plus-item" onclick="triggerAtt('file')">
-          <div class="plus-ic" style="background:linear-gradient(135deg,#3b82f6,#6366f1)">📄</div>
-          <span>File / Document</span>
+        <div class="plus-feat" onclick="sq('Is topic pe deep research karo aur detailed report do: ')">
+          <div class="plus-feat-ic" style="color:#60a5fa">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </div>
+          <div><div class="plus-feat-title">Deep research</div><div class="plus-feat-sub">In-depth analysis karo</div></div>
         </div>
-        <div class="plus-item" onclick="triggerAtt('pdf')">
-          <div class="plus-ic" style="background:linear-gradient(135deg,#ef4444,#dc2626)">📕</div>
-          <span>PDF upload karo</span>
+        <div class="plus-feat" onclick="sq('Ye product/service ke baare mein shopping guide banao: ')">
+          <div class="plus-feat-ic" style="color:#fb923c">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+          </div>
+          <div><div class="plus-feat-title">Shopping research</div><div class="plus-feat-sub">Best deal dhundo</div></div>
+        </div>
+        <div class="plus-feat" onclick="sq('Aaj ki latest news aur updates batao: ')">
+          <div class="plus-feat-ic" style="color:#a78bfa">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          </div>
+          <div><div class="plus-feat-title">Web search</div><div class="plus-feat-sub">Real-time news & info</div></div>
+        </div>
+        <div class="plus-feat" onclick="sq('Mujhe yeh concept sikhao step by step: ')">
+          <div class="plus-feat-ic" style="color:#34d399">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          </div>
+          <div><div class="plus-feat-title">Study and learn</div><div class="plus-feat-sub">Koi bhi concept seekho</div></div>
+        </div>
+        <div class="plus-feat" onclick="sq('Is topic pe mera quiz lo aur score batao: ')">
+          <div class="plus-feat-ic" style="color:#f472b6">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <div><div class="plus-feat-title">Quizzes</div><div class="plus-feat-sub">Knowledge test karo</div></div>
+        </div>
+        <div class="plus-feat" onclick="sq('Mujhe aaj ke liye productivity tips aur schedule banao')">
+          <div class="plus-feat-ic" style="color:#fbbf24">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div><div class="plus-feat-title">Boost my day</div><div class="plus-feat-sub">Daily planning & tips</div></div>
         </div>
       </div>
       <!-- Hidden file inputs -->
@@ -688,9 +774,9 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 
       <div class="inp-box">
         <button class="plus-btn" id="plusBtn" onclick="togglePlusMenu()" title="Attach">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         </button>
-        <textarea class="chat-inp" id="chatInp" placeholder="Perry se kuch bhi poochho..." rows="1"
+        <textarea class="chat-inp" id="chatInp" placeholder="Ask PerryAI" rows="1"
           onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
         <div class="inp-btns">
           <button class="voice-call-btn" id="voiceCallBtn" onclick="toggleVoiceCall()" title="Voice se baat karo">
@@ -875,7 +961,7 @@ CAPABILITIES: Market analysis (NSE/BSE/crypto), investment advice (India-focused
 
 LANGUAGE RULES: Hamesha user ki language mein jawab do — Hindi mein poochha? Hindi mein jawab. Hinglish? Hinglish. English? English. Mix? Mix.
 
-FORMATTING: **bold** for important points. Bullet points when listing. Code blocks for code. Keep responses concise but complete. Be warm and friendly like a knowledgeable friend.
+FORMATTING: **bold** for important points. Bullet points when listing. ALWAYS use fenced code blocks with language tag for code (e.g. ```python, ```javascript, ```html, ```java, ```cpp). Keep responses concise but complete. Be warm and friendly like a knowledgeable friend.
 
 TRAINING: Users ke previous conversations se seekho aur unhe better serve karo. Unki preferences, interests aur communication style yaad rakho.${memStr}${userInfo}`;
 }
@@ -1001,11 +1087,13 @@ function showScreen(id){
 // USER AUTH
 // ════════════════════════════════════════════════════════
 function doLogin(){
-  const u=document.getElementById('ul-user').value.trim();
-  const p=document.getElementById('ul-pass').value.trim();
+  const u=document.getElementById('ul-user').value.trim().toLowerCase();
+  const p=document.getElementById('ul-pass').value;
   if(!u||!p){setUlErr('Sab fields bharo!');return;}
-  const users=getUsers();
-  if(!users[u]){setUlErr('❌ User nahi mila!');return;}
+  // Always fresh read from localStorage
+  const rawUsers=localStorage.getItem('perry_users');
+  const users=rawUsers?JSON.parse(rawUsers):{};
+  if(!users[u]){setUlErr('❌ Username nahi mila!');return;}
   if(users[u].password!==p){setUlErr('❌ Password galat hai!');return;}
   loginUser({...users[u],username:u});
 }
@@ -1017,12 +1105,15 @@ function doRegister(){
   const p=document.getElementById('ur-pass').value.trim();
   if(!n||!u||!p){setUlErr('Sab fields bharo!');return;}
   if(p.length<4){setUlErr('Password 4+ characters ka ho!');return;}
-  if(u==='admin'){setUlErr('❌ Yeh username reserved hai!');return;}
+  const uLow=u.toLowerCase();
+  if(uLow==='admin'){setUlErr('❌ Yeh username reserved hai!');return;}
   const users=getUsers();
-  if(users[u]){setUlErr('❌ Username pehle se le liya gaya!');return;}
-  users[u]={name:n,username:u,password:p,role:'user',joined:new Date().toLocaleDateString('en-IN'),msgs:0,joinedTs:Date.now()};
+  if(users[uLow]){setUlErr('❌ Username pehle se le liya gaya!');return;}
+  const u_=uLow; // use lowercase
+  const userData={name:n,username:u,password:p,role:'user',joined:new Date().toLocaleDateString('en-IN'),msgs:0,joinedTs:Date.now()};
+  users[u]=userData;
   saveUsers(users);
-  loginUser({...users[u]});
+  loginUser({...userData,username:u});
 }
 function loginUser(user){
   curUser=user;
@@ -1091,8 +1182,16 @@ function toggleDropdown(){
 
 function userLogout(){
   if(!confirm('Logout karna chahte ho?'))return;
-  curUser=null;localStorage.removeItem('perry_sess_user');
-  showScreen('userLogin');showLogin();
+  curUser=null;
+  localStorage.removeItem('perry_sess_user');
+  // Clear input fields on logout
+  const uu=document.getElementById('ul-user');
+  const up=document.getElementById('ul-pass');
+  if(uu)uu.value='';
+  if(up)up.value='';
+  setUlErr('');
+  showScreen('userLogin');
+  showLogin();
 }
 function setUlErr(m){document.getElementById('ul-err').innerHTML=m;}
 function showLogin(){
@@ -1504,7 +1603,12 @@ function handleGoogle(resp){
 // ════════════════════════════════════════════════════════
 // CHAT ENGINE
 // ════════════════════════════════════════════════════════
-function sq(t){document.getElementById('chatInp').value=t;sendMsg();}
+function sq(t){
+  // Close plus menu
+  const pm=document.getElementById('plusMenu');
+  const pb=document.getElementById('plusBtn');
+  if(pm)pm.style.display='none';
+  if(pb)pb.classList.remove('open');document.getElementById('chatInp').value=t;sendMsg();}
 function handleKey(e){
   if(e.key==='Enter'&&!e.shiftKey){
     e.preventDefault();
@@ -1579,7 +1683,12 @@ async function sendMsg(){
   const dispText=text+(attachments.length?' '+attachments.map(a=>a.type==='image'?'📷 '+a.name:'📄 '+a.name).join(' '):'');
   attachments=[];renderAttBar();
   if(!getAvail().length){
-    {renderMsg('ai','⚠️ PerryAI abhi setup ho raha hai — thodi der baad try karo ya admin se contact karo!')}
+    // Try to reload keys from storage first
+    reloadKeys();
+    if(!getAvail().length){
+      {renderMsg('ai','⚠️ API key nahi mili! Admin se keys setup karwao ya:\n\n1. Sidebar mein ⚙️ icon dabao\n2. Apni Groq ya Gemini key daalo (free hain)\n3. Phir message karo!');}
+      return;
+    }
     return;
   }
   el.value='';el.style.height='auto';
@@ -1645,13 +1754,128 @@ function renderMsg(role,text){
 }
 
 function fmt(t){
-  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/```([\s\S]*?)```/g,'<pre><code>$1</code></pre>')
-    .replace(/`([^`]+)`/g,'<code>$1</code>')
-    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g,'<em>$1</em>')
-    .replace(/\n/g,'<br>');
+  var parts=[], last=0;
+  var re=/```(\w*)\n?([\s\S]*?)```/g, m;
+  while((m=re.exec(t))!==null){
+    if(m.index>last) parts.push({type:'text',val:t.slice(last,m.index)});
+    parts.push({type:'code',lang:(m[1]||'').toLowerCase(),val:m[2]});
+    last=m.index+m[0].length;
+  }
+  if(last<t.length) parts.push({type:'text',val:t.slice(last)});
+  return parts.map(function(p){
+    if(p.type==='code'){
+      var lang=p.lang;
+      var names={'python':'Python','javascript':'JavaScript','js':'JavaScript','html':'HTML','css':'CSS','java':'Java','cpp':'C++','c':'C','php':'PHP','sql':'SQL','bash':'Bash','sh':'Shell','json':'JSON','typescript':'TypeScript','ts':'TypeScript','kotlin':'Kotlin','swift':'Swift','go':'Go','rust':'Rust','ruby':'Ruby'};
+      var dLang=names[lang]||lang||'Code';
+      // Simple syntax highlight - no external lib
+      var hi=simpleHL(p.val, lang);
+      window._cb=window._cb||{};
+      var uid='cb'+Date.now().toString(36)+Math.random().toString(36).substr(2,4);
+      window._cb[uid]=p.val;
+      return '<div class="cbw">'
+        +'<div class="code-hdr">'
+        +'<span class="code-lang">'+dLang+'</span>'
+        +'<button class="code-copy-btn" data-uid="'+uid+'" onclick="cpCode(this)">&#128203; Copy</button>'
+        +'</div>'
+        +'<pre><code>'+hi+'</code></pre>'
+        +'</div>';
+    }
+    return p.val
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/`([^`\n]+)`/g,'<code>$1</code>')
+      .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g,'<em>$1</em>')
+      .replace(/\n/g,'<br>');
+  }).join('');
 }
+
+function simpleHL(code, lang){
+  // Escape first
+  var s=code.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Keywords by language group
+  var kw=[];
+  if(lang==='python'){kw=['def','class','import','from','return','if','elif','else','for','while','in','not','and','or','True','False','None','try','except','finally','with','as','pass','break','continue','lambda','yield','global','nonlocal','del','raise','assert'];}
+  else if(lang==='javascript'||lang==='js'||lang==='typescript'||lang==='ts'){kw=['function','var','let','const','return','if','else','for','while','do','switch','case','break','continue','class','new','this','typeof','instanceof','import','export','default','from','async','await','try','catch','finally','throw','null','undefined','true','false','of','in'];}
+  else if(lang==='java'||lang==='kotlin'){kw=['public','private','protected','class','interface','extends','implements','return','if','else','for','while','do','new','this','super','static','final','void','int','long','double','float','boolean','String','null','true','false','import','package','try','catch','finally','throw','throws'];}
+  else if(lang==='html'){
+    s=s.replace(/(&lt;\/?)([\w-]+)/g,'$1<span style="color:#e06c75">$2</span>');
+    s=s.replace(/([\w-]+)=/g,'<span style="color:#d19a66">$1</span>=');
+    s=s.replace(/=(&quot;[^&]*&quot;)/g,'=<span style="color:#98c379">$1</span>');
+    s=s.replace(/(&lt;!--[\s\S]*?--&gt;)/g,'<span style="color:#7f848e;font-style:italic">$1</span>');
+    return s;
+  }
+  else if(lang==='css'){
+    s=s.replace(/([\w-]+)\s*:/g,'<span style="color:#e06c75">$1</span>:');
+    s=s.replace(/(#[\w]+|rgba?\([^)]+\))/g,'<span style="color:#d19a66">$1</span>');
+    s=s.replace(/(\/\*[\s\S]*?\*\/)/g,'<span style="color:#7f848e;font-style:italic">$1</span>');
+    return s;
+  }
+  else if(lang==='sql'){kw=['SELECT','FROM','WHERE','INSERT','UPDATE','DELETE','CREATE','DROP','ALTER','TABLE','INTO','VALUES','SET','JOIN','LEFT','RIGHT','INNER','OUTER','ON','AS','AND','OR','NOT','NULL','IS','IN','LIKE','ORDER','BY','GROUP','HAVING','LIMIT','DISTINCT','INDEX','PRIMARY','KEY','FOREIGN','REFERENCES','select','from','where','insert','update','delete','create','drop','alter','table','into','values','set','join','order','group','having','limit'];}
+  else if(lang==='bash'||lang==='sh'){
+    s=s.replace(/(#[^\n]*)/g,'<span style="color:#7f848e;font-style:italic">$1</span>');
+    s=s.replace(/\b(echo|cd|ls|mkdir|rm|cp|mv|cat|grep|sed|awk|curl|wget|chmod|sudo|apt|pip|npm|git)\b/g,'<span style="color:#61afef">$1</span>');
+    s=s.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,'<span style="color:#98c379">$1</span>');
+    return s;
+  }
+  // Generic: strings, numbers, comments
+  // Strings
+  s=s.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g,'<span style="color:#98c379">$1</span>');
+  // Numbers
+  s=s.replace(/\b(\d+\.?\d*)\b/g,'<span style="color:#d19a66">$1</span>');
+  // Comments
+  s=s.replace(/(\/\/[^\n]*|#[^\n]*)/g,'<span style="color:#7f848e;font-style:italic">$1</span>');
+  s=s.replace(/(\/\*[\s\S]*?\*\/)/g,'<span style="color:#7f848e;font-style:italic">$1</span>');
+  // Keywords
+  if(kw.length){
+    kw.forEach(function(k){
+      var re=new RegExp('\\b'+k+'\\b','g');
+      s=s.replace(re,'<span style="color:#c678dd">'+k+'</span>');
+    });
+  }
+  return s;
+}
+
+function cpCode(btn){
+  var uid=btn.getAttribute('data-uid');
+  var text=(window._cb&&window._cb[uid])||'';
+  if(!text){var code=btn.closest('.cbw').querySelector('code');text=code?code.innerText:'';}
+  var done=function(){btn.textContent='Copied!';setTimeout(function(){btn.innerHTML='&#128203; Copy';},2000);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(function(){fbCopy(text);done();});
+  } else {fbCopy(text);done();}
+}
+function fbCopy(text){
+  var ta=document.createElement('textarea');
+  ta.value=text;ta.style.cssText='position:fixed;top:0;left:0;opacity:0';
+  document.body.appendChild(ta);ta.focus();ta.select();
+  try{document.execCommand('copy');}catch(e){}
+  document.body.removeChild(ta);
+}
+
+
+function copyCodeById(uid){
+  var btn=document.getElementById(uid);
+  var wrap=btn?btn.closest('.code-block-wrap'):null;
+  var code=wrap?wrap.querySelector('code'):null;
+  var text=(window._codeBlocks&&window._codeBlocks[uid])||( code?(code.innerText||code.textContent):'');
+  if(!text){showToast('Kuch nahi mila!');return;}
+  var copySvg='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+  var checkSvg='<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
+  navigator.clipboard.writeText(text).then(function(){
+    if(btn){btn.classList.add('copied');btn.innerHTML=checkSvg+' Copied!';}
+    setTimeout(function(){if(btn){btn.classList.remove('copied');btn.innerHTML=copySvg+' Copy';}},2000);
+  }).catch(function(){
+    // Fallback for mobile
+    var ta=document.createElement('textarea');
+    ta.value=text;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    if(btn){btn.classList.add('copied');btn.innerHTML=checkSvg+' Copied!';}
+    setTimeout(function(){if(btn){btn.classList.remove('copied');btn.innerHTML=copySvg+' Copy';}},2000);
+  });
+}
+function copyCode(btn,uid){copyCodeById(uid);}
 function esc(t){return t?t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''}
 
 function showTyping(){
@@ -2456,4 +2680,28 @@ function showToast(m){
 <div class="voice-status" id="voiceStatus"></div>
 
 </body>
-</html>
+</html>/* ── Input Area ── */
+.inp-area{padding:10px 16px 14px;background:transparent;position:relative;flex-shrink:0}
+.inp-box{display:flex;align-items:flex-end;gap:0;background:#1c1c1e;border-radius:28px;padding:6px 6px 6px 14px;border:1.5px solid #3a3a3c;transition:border-color .2s}
+body.light .inp-box{background:#f0f0f0;border-color:#d1d1d6}
+.inp-box:focus-within{border-color:#5a5a5e}
+.chat-inp{flex:1;background:transparent;border:none;outline:none;color:var(--t1);font-size:16px;font-family:var(--font);resize:none;max-height:180px;line-height:1.5;padding:6px 8px;min-height:28px}
+.chat-inp::placeholder{color:#636366}
+body.light .chat-inp::placeholder{color:#8e8e93}
+.inp-btns{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.plus-btn{width:34px;height:34px;border-radius:50%;border:none;background:transparent;color:#8e8e93;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;padding:0;margin-right:2px}
+.plus-btn:hover{color:var(--t1)}
+.plus-btn.open{transform:rotate(45deg);color:var(--t1)}
+
+/* Mic button - grey circle */
+.voice-call-btn{width:36px;height:36px;border-radius:50%;border:none;background:#636366;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.voice-call-btn:hover{background:#8e8e93}
+.voice-call-btn.vc-on{background:#ef4444;box-shadow:0 0 14px rgba(239,68,68,.5)}
+
+/* Send button - white circle */
+.send-btn{width:36px;height:36px;border-radius:50%;border:none;background:#fff;color:#000;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+body.light .send-btn{background:#1c1c1e;color:#fff}
+.send-btn:hover{transform:scale(1.05)}
+.send-btn:active{transform:scale(.95)}
+
+
