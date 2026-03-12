@@ -9,7 +9,54 @@
 <meta name="apple-mobile-web-app-title" content="PerryAI">
 <meta name="theme-color" content="#0a0a0a">
 <link rel="manifest" id="pwaManifest">
-<title>PerryAI v2.4</title>
+
+<!-- ══ SEO & Discovery ══ -->
+<title>PerryAI — India Ka Smart AI Assistant | Hindi & English</title>
+<meta name="description" content="PerryAI — India ka best free AI assistant. Hindi, Hinglish aur English mein baat karo. Market analysis, writing, coding, investment advice, social media — sab kuch ek jagah.">
+<meta name="keywords" content="PerryAI, India AI assistant, Hindi AI, free AI chatbot India, AI in Hindi, ChatGPT alternative India, Hinglish AI, best AI India 2024, free chatbot Hindi, AI assistant Hindi">
+<meta name="author" content="PerryAI">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://perry-ai.vercel.app">
+
+<!-- ══ Open Graph (WhatsApp, Facebook preview) ══ -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://perry-ai.vercel.app">
+<meta property="og:title" content="PerryAI — India Ka Smart AI Assistant">
+<meta property="og:description" content="India ka best free AI assistant. Hindi, Hinglish aur English mein baat karo. Market analysis, writing, coding, investment — sab ek jagah!">
+<meta property="og:image" content="https://perry-ai.vercel.app/preview.png">
+<meta property="og:locale" content="hi_IN">
+<meta property="og:site_name" content="PerryAI">
+
+<!-- ══ Twitter/X Card ══ -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url" content="https://perry-ai.vercel.app">
+<meta name="twitter:title" content="PerryAI — India Ka Smart AI Assistant">
+<meta name="twitter:description" content="Free AI assistant in Hindi & English. Market analysis, writing, coding — sab kuch!">
+<meta name="twitter:image" content="https://perry-ai.vercel.app/preview.png">
+
+<!-- ══ Schema.org Structured Data (Google rich results) ══ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "PerryAI",
+  "url": "https://perry-ai.vercel.app",
+  "description": "India ka best free AI assistant. Hindi aur English mein baat karo.",
+  "applicationCategory": "AIApplication",
+  "operatingSystem": "Web Browser",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "INR"
+  },
+  "inLanguage": ["hi", "en"],
+  "keywords": "AI assistant, Hindi AI, India AI, free chatbot",
+  "creator": {
+    "@type": "Person",
+    "name": "Abhinav Pandey"
+  }
+}
+</script>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
@@ -874,7 +921,9 @@ let KEYS = {
   openrouter: localStorage.getItem('pk_or')||'',
   deepseek:   localStorage.getItem('pk_ds')||'',
   groq:       localStorage.getItem('pk_gr')||'',
-  gemini:     localStorage.getItem('pk_gm')||''
+  gemini:     localStorage.getItem('pk_gm')||'',
+  stability:  localStorage.getItem('pk_st')||'',
+  tavily:     localStorage.getItem('pk_tv')||''
 };
 // Refresh keys every time page loads
 function reloadKeys(){
@@ -882,8 +931,155 @@ function reloadKeys(){
   KEYS.deepseek=localStorage.getItem('pk_ds')||'';
   KEYS.groq=localStorage.getItem('pk_gr')||'';
   KEYS.gemini=localStorage.getItem('pk_gm')||'';
+  KEYS.stability=localStorage.getItem('pk_st')||'';
+  KEYS.tavily=localStorage.getItem('pk_tv')||'';
 }
 let curProvIdx = LS('pk_cur',0);
+
+// ════════════════════════════════════════════════════════
+// IMAGE GENERATION (Stability AI)
+// ════════════════════════════════════════════════════════
+async function generateImage(prompt){
+  reloadKeys();
+  const key=KEYS.stability;
+  if(!key){
+    showToast('❌ Stability AI key nahi hai! Admin panel mein daalo.');
+    return null;
+  }
+  showToast('🎨 Image ban rahi hai...');
+  try{
+    const r=await fetch('https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+key,'Accept':'application/json'},
+      body:JSON.stringify({text_prompts:[{text:prompt,weight:1},{text:'blurry, bad quality, distorted',weight:-1}],cfg_scale:7,height:1024,width:1024,steps:30,samples:1})
+    });
+    if(!r.ok){const e=await r.json();throw new Error(e.message||'Generation failed');}
+    const d=await r.json();
+    const b64=d.artifacts[0].base64;
+    return 'data:image/png;base64,'+b64;
+  }catch(e){
+    showToast('❌ Image error: '+e.message);
+    return null;
+  }
+}
+
+function renderImageMsg(src, prompt){
+  const wrap=document.getElementById('msgs');
+  const div=document.createElement('div');
+  div.className='mrow ai';
+  div.innerHTML='<div class="av aav" style="display:flex;align-items:center;justify-content:center">🤖</div>'
+    +'<div class="mc"><div class="mb">'
+    +'<div style="font-size:12.5px;color:var(--t2);margin-bottom:8px">🎨 '+prompt+'</div>'
+    +'<img src="'+src+'" style="max-width:100%;border-radius:12px;display:block;margin-bottom:8px" />'
+    +'<a href="'+src+'" download="perryai_image.png" style="display:inline-flex;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--b);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--t2);text-decoration:none">⬇️ Download</a>'
+    +'</div></div>';
+  wrap.appendChild(div);
+  const ca=document.getElementById('chatArea');if(ca)ca.scrollTop=ca.scrollHeight;
+}
+
+// ════════════════════════════════════════════════════════
+// IMAGE VISION (Gemini)
+// ════════════════════════════════════════════════════════
+async function analyzeImageWithVision(base64img, userQuestion){
+  reloadKeys();
+  const key=KEYS.gemini||KEYS.openrouter;
+  if(!key){showToast('❌ Gemini ya OpenRouter key chahiye image analysis ke liye!');return null;}
+
+  showToast('👁️ Image analyze ho rahi hai...');
+  try{
+    if(KEYS.gemini){
+      // Use Gemini Vision
+      const imgData=base64img.split(',')[1];
+      const mimeType=base64img.startsWith('data:image/png')?'image/png':'image/jpeg';
+      const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key='+KEYS.gemini,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[
+          {inline_data:{mime_type:mimeType,data:imgData}},
+          {text:userQuestion||'Is image mein kya hai? Detail mein batao.'}
+        ]}],generationConfig:{maxOutputTokens:1000}})
+      });
+      const d=await r.json();
+      if(d.error)throw new Error(d.error.message);
+      return d.candidates[0].content.parts[0].text;
+    } else {
+      // OpenRouter vision
+      const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+KEYS.openrouter},
+        body:JSON.stringify({model:'meta-llama/llama-3.2-11b-vision-instruct:free',max_tokens:800,
+          messages:[{role:'user',content:[
+            {type:'image_url',image_url:{url:base64img}},
+            {type:'text',text:userQuestion||'Is image mein kya hai? Detail mein batao.'}
+          ]}]})
+      });
+      const d=await r.json();
+      if(d.error)throw new Error(d.error.message||JSON.stringify(d.error));
+      return d.choices[0].message.content;
+    }
+  }catch(e){
+    showToast('❌ Vision error: '+e.message);
+    return null;
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// DEEP RESEARCH (Tavily)
+// ════════════════════════════════════════════════════════
+async function doDeepResearch(query){
+  reloadKeys();
+  const key=KEYS.tavily;
+  if(!key){
+    // Fallback: use AI without web search
+    showToast('ℹ️ Tavily key nahi — AI se research kar raha hun...');
+    return null;
+  }
+  showToast('🔍 Web research ho rahi hai...');
+  try{
+    const r=await fetch('https://api.tavily.com/search',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({api_key:key,query:query,search_depth:'advanced',max_results:6,include_answer:true,include_raw_content:false})
+    });
+    const d=await r.json();
+    if(d.error)throw new Error(d.error);
+    // Build context from results
+    let ctx='Web se mili information:
+
+';
+    if(d.answer)ctx+='Summary: '+d.answer+'
+
+';
+    if(d.results){
+      d.results.slice(0,5).forEach((res,i)=>{
+        ctx+=(i+1)+'. '+res.title+'
+'+res.content.slice(0,300)+'...
+ Source: '+res.url+'
+
+';
+      });
+    }
+    return ctx;
+  }catch(e){
+    showToast('⚠️ Web search failed: '+e.message);
+    return null;
+  }
+}
+
+// ════════════════════════════════════════════════════════
+// SMART INTENT DETECTION
+// ════════════════════════════════════════════════════════
+function detectIntent(msg){
+  const m=msg.toLowerCase();
+  // Image generation
+  if(/image bana|photo bana|picture bana|draw|generate image|ek image|tasveer bana|create image|paint|illustration/.test(m))
+    return 'image_gen';
+  // Deep research
+  if(/deep research|research kar|web search|latest news|aaj ki khabar|current|2024|2025|2026|abhi kya|news|trending/.test(m))
+    return 'research';
+  // Image analysis (if attachment present)
+  return 'chat';
+}
+
 
 // ════════════════════════════════════════════════════════
 // AI PROVIDERS
@@ -891,7 +1087,7 @@ let curProvIdx = LS('pk_cur',0);
 const PROVIDERS = [
   {
     id:'openrouter',name:'OpenRouter',short:'OR',icon:'🌊',
-    models:['meta-llama/llama-3.3-70b-instruct:free','mistralai/mistral-7b-instruct:free','google/gemma-2-9b-it:free','qwen/qwen-2-7b-instruct:free'],
+    models:['meta-llama/llama-3.3-70b-instruct:free','deepseek/deepseek-r1-distill-llama-70b:free','google/gemma-2-9b-it:free','mistralai/mistral-7b-instruct:free','qwen/qwen2.5-72b-instruct:free'],
     mIdx:0,
     call:async(msgs,sys,key)=>{
       const p=PROVIDERS[0];
@@ -914,12 +1110,18 @@ const PROVIDERS = [
   {
     id:'deepseek',name:'DeepSeek',short:'DS',icon:'🔵',
     call:async(msgs,sys,key)=>{
-      const r=await fetch('https://api.deepseek.com/chat/completions',{method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
-        body:JSON.stringify({model:'deepseek-chat',max_tokens:1400,messages:[{role:'system',content:sys},...msgs]})});
-      const d=await r.json();
-      if(d.error)throw new Error(d.error.message||JSON.stringify(d.error));
-      return d.choices[0].message.content;
+      try{
+        const r=await fetch('https://api.deepseek.com/chat/completions',{method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+          body:JSON.stringify({model:'deepseek-chat',max_tokens:1400,messages:[{role:'system',content:sys},...msgs]})});
+        const d=await r.json();
+        if(d.error)throw new Error(d.error.message||JSON.stringify(d.error));
+        if(!d.choices?.[0]?.message?.content)throw new Error('Empty response');
+        return d.choices[0].message.content;
+      }catch(e){
+        if(e.message.includes('fetch')||e.message.includes('CORS'))throw new Error('DeepSeek CORS error - use OpenRouter instead');
+        throw e;
+      }
     }
   },
   {
@@ -939,13 +1141,31 @@ const PROVIDERS = [
   {
     id:'gemini',name:'Gemini',short:'GM',icon:'✨',
     call:async(msgs,sys,key)=>{
-      const gc=msgs.map(m=>({role:m.role==='assistant'?'model':'user',parts:[{text:m.content}]}));
-      const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:gc,generationConfig:{maxOutputTokens:1400}})});
-      const d=await r.json();
-      if(d.error)throw new Error(d.error.message);
-      return d.candidates[0].content.parts[0].text;
+      // Fix consecutive same-role messages for Gemini
+      const gc=[];
+      for(let i=0;i<msgs.length;i++){
+        const role=msgs[i].role==='assistant'?'model':'user';
+        if(gc.length>0&&gc[gc.length-1].role===role){
+          gc[gc.length-1].parts[0].text+='\n'+msgs[i].content;
+        } else {
+          gc.push({role,parts:[{text:msgs[i].content}]});
+        }
+      }
+      // Try gemini-2.0-flash first, then 1.5-flash
+      const models=['gemini-2.0-flash','gemini-1.5-flash'];
+      let lastErr='';
+      for(const model of models){
+        try{
+          const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+model+':generateContent?key='+key,{
+            method:'POST',headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:gc,generationConfig:{maxOutputTokens:1400}})});
+          const d=await r.json();
+          if(d.error){lastErr=d.error.message;continue;}
+          if(!d.candidates?.[0]?.content?.parts?.[0]?.text){lastErr='Empty response';continue;}
+          return d.candidates[0].content.parts[0].text;
+        }catch(e){lastErr=e.message;}
+      }
+      throw new Error(lastErr||'Gemini failed');
     }
   }
 ];
@@ -1401,26 +1621,85 @@ function loadAdminNav(section){
     <div class="sec">
       <div class="sec-hdr"><div class="sec-title">🔑 API Keys Manager</div></div>
       <div class="sec-body">
-        <div style="font-size:12.5px;color:var(--t2);margin-bottom:16px;line-height:1.8">Keys daalo — PerryAI automatically best available use karega. Sab keys encrypted local storage mein save hain.</div>
-        <div style="margin-bottom:14px">
-          <div style="font-size:11px;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">🌊 OpenRouter (Recommended)</div>
-          <input class="a-inp" id="ak-or" type="password" placeholder="sk-or-v1-..." value="${KEYS.openrouter?'●'.repeat(20):''}"/>
-          <div style="font-size:11px;color:var(--t2)">Free models: Llama 3.3 70B, Mistral, Gemma • <a href="https://openrouter.ai" target="_blank" style="color:var(--ac)">openrouter.ai</a></div>
+        <!-- Key Guide Cards -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+          <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:10px">
+            <div style="font-size:11px;font-weight:700;color:#10b981;margin-bottom:6px">✅ ZARURI (Chat ke liye)</div>
+            <div style="font-size:11px;color:var(--t2);line-height:1.8">
+              • <b>OpenRouter</b> — best<br>
+              • <b>Gemini</b> — free & fast<br>
+              • <b>Groq</b> — sabse fast
+            </div>
+            <div style="font-size:10px;color:var(--t3);margin-top:6px">Inme se koi EK daalo — kaam chalega</div>
+          </div>
+          <div style="background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:10px">
+            <div style="font-size:11px;font-weight:700;color:#f59e0b;margin-bottom:6px">⭐ EXTRA Features</div>
+            <div style="font-size:11px;color:var(--t2);line-height:1.8">
+              • <b>Stability AI</b> — image banana<br>
+              • <b>Tavily</b> — web search<br>
+              • <b>DeepSeek</b> — coding AI
+            </div>
+            <div style="font-size:10px;color:var(--t3);margin-top:6px">Optional — baad mein daalo</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--t2);margin-bottom:14px">👇 Keys daalo — link pe click karo, free signup karo, key copy karo aur yahan paste karo:</div>
+        
+        <div style="font-size:10.5px;font-weight:700;color:var(--ac);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">💬 Chat AI</div>
+        <div style="margin-bottom:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div style="font-size:11px;color:var(--t2);font-weight:600">🌊 OpenRouter</div>
+            <a href="https://openrouter.ai/keys" target="_blank" style="font-size:11px;color:var(--ac);background:rgba(16,185,129,.1);padding:2px 8px;border-radius:20px;text-decoration:none">Free key lao →</a>
+          </div>
+          <input class="a-inp" id="ak-or" type="password" placeholder="sk-or-v1-..." value="${KEYS.openrouter?'●'.repeat(16):''}"/>
+          <div style="font-size:10.5px;color:var(--t3);margin-top:3px">Llama, Mistral, Gemma — best free models • Signup → API Keys → Create Key</div>
+        </div>
+        <div style="margin-bottom:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div style="font-size:11px;color:var(--t2);font-weight:600">✨ Google Gemini</div>
+            <a href="https://aistudio.google.com/apikey" target="_blank" style="font-size:11px;color:var(--ac);background:rgba(16,185,129,.1);padding:2px 8px;border-radius:20px;text-decoration:none">Free key lao →</a>
+          </div>
+          <input class="a-inp" id="ak-gm" type="password" placeholder="AIza..." value="${KEYS.gemini?'●'.repeat(16):''}"/>
+          <div style="font-size:10.5px;color:var(--t3);margin-top:3px">Chat + Image samajhna (Vision) • aistudio.google.com → Get API Key</div>
+        </div>
+        <div style="margin-bottom:10px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div style="font-size:11px;color:var(--t2);font-weight:600">⚡ Groq</div>
+            <a href="https://console.groq.com/keys" target="_blank" style="font-size:11px;color:var(--ac);background:rgba(16,185,129,.1);padding:2px 8px;border-radius:20px;text-decoration:none">Free key lao →</a>
+          </div>
+          <input class="a-inp" id="ak-gr" type="password" placeholder="gsk_..." value="${KEYS.groq?'●'.repeat(16):''}"/>
+          <div style="font-size:10.5px;color:var(--t3);margin-top:3px">Sabse fast responses • console.groq.com → API Keys → Create</div>
         </div>
         <div style="margin-bottom:14px">
-          <div style="font-size:11px;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">🔵 DeepSeek</div>
-          <input class="a-inp" id="ak-ds" type="password" placeholder="sk-..." value="${KEYS.deepseek?'●'.repeat(20):''}"/>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div style="font-size:11px;color:var(--t2);font-weight:600">🔵 DeepSeek</div>
+            <a href="https://platform.deepseek.com/api_keys" target="_blank" style="font-size:11px;color:var(--ac);background:rgba(16,185,129,.1);padding:2px 8px;border-radius:20px;text-decoration:none">Key lao →</a>
+          </div>
+          <input class="a-inp" id="ak-ds" type="password" placeholder="sk-..." value="${KEYS.deepseek?'●'.repeat(16):''}"/>
+          <div style="font-size:10.5px;color:var(--t3);margin-top:3px">Coding ke liye best • Paid but cheap (~$0.14/million tokens)</div>
         </div>
+
+        <div style="font-size:10.5px;font-weight:700;color:#f59e0b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;padding-top:10px;border-top:1px solid var(--b)">🎨 Image Generation</div>
         <div style="margin-bottom:14px">
-          <div style="font-size:11px;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">⚡ Groq (Super Fast)</div>
-          <input class="a-inp" id="ak-gr" type="password" placeholder="gsk_..." value="${KEYS.groq?'●'.repeat(20):''}"/>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div style="font-size:11px;color:var(--t2);font-weight:600">🖼️ Stability AI</div>
+            <a href="https://platform.stability.ai/account/keys" target="_blank" style="font-size:11px;color:#f59e0b;background:rgba(245,158,11,.1);padding:2px 8px;border-radius:20px;text-decoration:none">Free trial →</a>
+          </div>
+          <input class="a-inp" id="ak-st" type="password" placeholder="sk-..." value="${KEYS.stability?'●'.repeat(16):''}"/>
+          <div style="font-size:10.5px;color:var(--t3);margin-top:3px">Image generate karne ke liye • 25 free images • platform.stability.ai</div>
         </div>
+
+        <div style="font-size:10.5px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;padding-top:10px;border-top:1px solid var(--b)">🔍 Deep Research</div>
         <div style="margin-bottom:16px">
-          <div style="font-size:11px;color:var(--t3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px">✨ Google Gemini</div>
-          <input class="a-inp" id="ak-gm" type="password" placeholder="AIza..." value="${KEYS.gemini?'●'.repeat(20):''}"/>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div style="font-size:11px;color:var(--t2);font-weight:600">🌐 Tavily Search</div>
+            <a href="https://app.tavily.com" target="_blank" style="font-size:11px;color:#a78bfa;background:rgba(167,139,250,.1);padding:2px 8px;border-radius:20px;text-decoration:none">1000 free/month →</a>
+          </div>
+          <input class="a-inp" id="ak-tv" type="password" placeholder="tvly-..." value="${KEYS.tavily?'●'.repeat(16):''}"/>
+          <div style="font-size:10.5px;color:var(--t3);margin-top:3px">Real-time web search ke liye • app.tavily.com → API Keys</div>
         </div>
+
         <div style="display:flex;gap:8px">
-          <button class="a-btn" onclick="adminSaveKeys()">Save Keys ✅</button>
+          <button class="a-btn" onclick="adminSaveKeys()">💾 Save Keys</button>
           <button class="a-btn sec-btn" onclick="clearAllKeys()">🗑️ Clear All</button>
         </div>
       </div>
@@ -1442,8 +1721,22 @@ function loadAdminNav(section){
           <button class="toggle ${set.voice?'on':''}" id="tog-voice" onclick="togSet('voice',this)"></button>
         </div>
         <div class="set-row">
-          <div class="set-info"><div class="set-lbl">Google Login</div><div class="set-sub">Google OAuth Client ID</div></div>
-          <input class="a-inp" id="gcid-inp" placeholder="XXXXX.apps.googleusercontent.com" value="${set.gcid||''}" style="margin:0;width:260px;font-size:11.5px"/>
+          <div style="display:flex;flex-direction:column;gap:8px;width:100%">
+            <div class="set-lbl">🔵 Google Login</div>
+            <div class="set-sub">Users Google se login kar sakenge</div>
+            <div style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:12px">
+              <div style="font-size:11.5px;font-weight:600;color:#60a5fa;margin-bottom:6px">Setup kaise karein:</div>
+              <div style="font-size:11px;color:var(--t2);line-height:2.2">
+                1️⃣ <a href="https://console.cloud.google.com" target="_blank" style="color:var(--ac)">console.cloud.google.com</a> → Sign in<br>
+                2️⃣ New Project → APIs &amp; Services → Credentials<br>
+                3️⃣ Create Credentials → OAuth Client ID → Web App<br>
+                4️⃣ Authorized origins: <b>https://perry-ai.vercel.app</b><br>
+                5️⃣ Client ID copy karo → neeche paste karo
+              </div>
+            </div>
+            <input class="a-inp" id="gcid-inp" placeholder="XXXXX.apps.googleusercontent.com" value="${set.gcid||\'\'}"/>
+            <div style="font-size:11px;color:${set.gcid?\'#10b981\':\'var(--t3)\'}">${set.gcid?\'✅ Google Login ON hai\':\'❌ Client ID daalo — tab Google button dikhega\'}</div>
+          </div>
         </div>
         <div style="margin-top:14px">
           <button class="a-btn" onclick="saveAdmSettings()">Save Settings</button>
@@ -1491,14 +1784,18 @@ function viewUserChat(un){
   openModal('chatModal');
 }
 function adminSaveKeys(){
-  const kO=document.getElementById('ak-or').value.trim();
-  const kD=document.getElementById('ak-ds').value.trim();
-  const kG=document.getElementById('ak-gr').value.trim();
-  const kGm=document.getElementById('ak-gm').value.trim();
+  const kO=document.getElementById('ak-or')?.value.trim()||'';
+  const kD=document.getElementById('ak-ds')?.value.trim()||'';
+  const kG=document.getElementById('ak-gr')?.value.trim()||'';
+  const kGm=document.getElementById('ak-gm')?.value.trim()||'';
+  const kSt=document.getElementById('ak-st')?.value.trim()||'';
+  const kTv=document.getElementById('ak-tv')?.value.trim()||'';
   if(kO&&!kO.includes('●')){KEYS.openrouter=kO;localStorage.setItem('pk_or',kO);}
   if(kD&&!kD.includes('●')){KEYS.deepseek=kD;localStorage.setItem('pk_ds',kD);}
   if(kG&&!kG.includes('●')){KEYS.groq=kG;localStorage.setItem('pk_gr',kG);}
   if(kGm&&!kGm.includes('●')){KEYS.gemini=kGm;localStorage.setItem('pk_gm',kGm);}
+  if(kSt&&!kSt.includes('●')){KEYS.stability=kSt;localStorage.setItem('pk_st',kSt);}
+  if(kTv&&!kTv.includes('●')){KEYS.tavily=kTv;localStorage.setItem('pk_tv',kTv);}
   curProvIdx=0;LS_set('pk_cur',0);
   showToast('✅ Keys saved! PerryAI ready!');loadAdminNav('keys');
 }
@@ -1675,6 +1972,87 @@ async function sendMsg(){
   const el=document.getElementById('chatInp');
   const text=el.value.trim();
   if((!text&&!attachments.length)||generating)return;
+
+  // ── Check for image attachment → use Vision ──
+  const imgAtt=attachments.find(a=>a.type==='image');
+  if(imgAtt&&text){
+    el.value='';autoResize(el);
+    attachments=[];renderAttBar();
+    renderMsg('user',text);
+    const typId=showTyping();
+    generating=true;
+    const result=await analyzeImageWithVision(imgAtt.preview, text);
+    removeTyping(typId);
+    generating=false;
+    if(result){
+      const {id:msgId}=renderMsg('ai',result);
+      chatMsgs.push({role:'user',content:text});
+      chatMsgs.push({role:'assistant',content:result});
+      saveHistMsgs();
+      setTimeout(()=>generateFollowups(result),400);
+    }
+    return;
+  }
+
+  // ── Check for image generation intent ──
+  const intent=detectIntent(text);
+  if(intent==='image_gen'){
+    el.value='';autoResize(el);
+    attachments=[];renderAttBar();
+    renderMsg('user',text);
+    const typId=showTyping();
+    generating=true;
+    // Extract prompt from message
+    const imgPrompt=text.replace(/image bana|photo bana|picture bana|generate image|ek image|tasveer bana|create image|draw|paint/gi,'').trim()||text;
+    const imgSrc=await generateImage(imgPrompt);
+    removeTyping(typId);
+    generating=false;
+    if(imgSrc){
+      renderImageMsg(imgSrc, imgPrompt);
+      chatMsgs.push({role:'user',content:text});
+      chatMsgs.push({role:'assistant',content:'[Image generated: '+imgPrompt+']'});
+      saveHistMsgs();
+    } else {
+      const {id}=renderMsg('ai','❌ Image nahi ban payi. Stability AI key check karo admin panel mein.');
+    }
+    return;
+  }
+
+  // ── Deep Research ──
+  if(intent==='research'){
+    el.value='';autoResize(el);
+    renderMsg('user',text);
+    const typId=showTyping();
+    generating=true;
+    const webCtx=await doDeepResearch(text);
+    // Build enhanced message with web context
+    const researchMsg=webCtx
+      ? 'Web research results:
+
+'+webCtx+'
+
+User ka sawal: '+text+'
+
+In results ke basis pe comprehensive answer do. Sources mention karo.'
+      : text;
+    try{
+      chatMsgs.push({role:'user',content:researchMsg});
+      const reply=await smartCall(chatMsgs.slice(-8));
+      chatMsgs[chatMsgs.length-1]={role:'user',content:text}; // store clean version
+      removeTyping(typId);
+      generating=false;
+      const {id:msgId}=renderMsg('ai',reply);
+      chatMsgs.push({role:'assistant',content:reply});
+      saveHistMsgs();
+      setTimeout(()=>generateFollowups(reply),400);
+    }catch(e){
+      removeTyping(typId);generating=false;
+      renderMsg('ai','❌ Research error: '+e.message);
+    }
+    return;
+  }
+
+  // ── Normal chat ──
   // Build prompt with attachments
   let fullText=text;
   if(attachments.length){
