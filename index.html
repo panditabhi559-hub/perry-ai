@@ -560,10 +560,11 @@ body.light .plus-feat:hover{background:rgba(0,0,0,.05)}
 @keyframes vcPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
 
 /* ── Follow-up Suggestions ── */
-.followup-wrap{display:flex;flex-wrap:wrap;gap:7px;padding:6px 0 4px 44px;animation:fadeUp .3s ease}
-.followup-chip{background:var(--card);border:1px solid var(--b);border-radius:20px;padding:7px 14px;font-size:12.5px;color:var(--t2);cursor:pointer;transition:all .18s;white-space:nowrap;font-family:var(--font);line-height:1}
-.followup-chip:hover{background:var(--card2);border-color:var(--ac);color:var(--t1);transform:translateY(-1px)}
-.followup-chip:active{transform:scale(.96)}
+.followup-wrap{display:flex;flex-direction:column;gap:6px;padding:6px 0 8px 44px;animation:fadeUp .3s ease;max-width:500px}
+.followup-chip{background:var(--card);border:1px solid var(--b);border-radius:12px;padding:10px 16px;font-size:13px;color:var(--t2);cursor:pointer;transition:all .18s;font-family:var(--font);line-height:1.4;text-align:left;display:flex;align-items:center;gap:8px;width:fit-content;max-width:100%}
+.followup-chip:hover{background:var(--card2);border-color:var(--ac);color:var(--t1);transform:translateX(4px);box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.followup-chip:active{transform:scale(.97)}
+@media(max-width:768px){.followup-wrap{padding:6px 0 8px 10px}}
 
 </style>
 </head>
@@ -1165,13 +1166,19 @@ function getSystemPrompt(){
   const userInfo = u?`\n\nUser ka naam: ${u.name||u.username}. Use familiar, warm tone.`:'';
   return `Tum PerryAI ho — India ka best personal AI assistant. Tum ek smart, warm, helpful AI ho jo India ke users ke liye kaam karta hai.
 
-CAPABILITIES: Market analysis (NSE/BSE/crypto), investment advice (India-focused), writing improvement, social media posts (Instagram/Twitter/LinkedIn), email drafting, coding help, translations (Hindi↔English), general knowledge, motivational content, aur sab kuch jo user maange.
+CAPABILITIES: Market analysis (NSE/BSE/crypto), investment advice (India-focused), writing improvement, social media posts (Instagram/Twitter/LinkedIn), email drafting, coding help, translations (Hindi↔English), general knowledge, motivational content, creative writing, scripts, reels, aur sab kuch jo user maange.
 
 LANGUAGE RULES: Hamesha user ki language mein jawab do — Hindi mein poochha? Hindi mein jawab. Hinglish? Hinglish. English? English. Mix? Mix.
 
-FORMATTING: Use **bold** for important points. Use bullet points when listing. For code, ALWAYS use fenced code blocks with the language name (python, javascript, html, java, cpp etc). Keep responses concise but complete. Be warm and friendly like a knowledgeable friend.
+FORMATTING: Use **bold** for important points. Use bullet points when listing. For code, ALWAYS use fenced code blocks with the language name. Keep responses concise but complete. Be warm and friendly like a knowledgeable friend.
 
-TRAINING: Users ke previous conversations se seekho aur unhe better serve karo. Unki preferences, interests aur communication style yaad rakho.${memStr}${userInfo}`;
+ANTI-REPETITION RULES (BAHUT ZAROORI):
+- Agar user dobara similar cheez maange (jaise "koi aur script likho", "ek aur do", "different one"), toh BILKUL NAYA content do
+- KABHI bhi pichla jawab copy mat karo — style, topic, angle, tone sab badlo
+- Creative requests mein har baar genuinely different approach lo
+- User ne "aur" ya "different" kaha = guaranteed fresh content, zero overlap with previous
+
+TRAINING: Users ke previous conversations se seekho aur unhe better serve karo.${memStr}${userInfo}`;
 }
 
 async function smartCall(msgs){
@@ -2587,42 +2594,44 @@ function removeOldFollowups(){
 }
 
 async function generateFollowups(aiReply){
-  removeOldFollowups(); // remove previous suggestions
+  removeOldFollowups();
   
-  // Get last user message for context
   const lastUser = chatMsgs.filter(m=>m.role==='user').slice(-1)[0]?.content||'';
+  const convLang = isHindi(lastUser) ? 'Hindi' : (lastUser.match(/[a-zA-Z]/) ? 'Hinglish ya English' : 'Hindi');
   
-  // Build prompt for generating suggestions
-  const prompt = `Based on this conversation:
-User: ${lastUser.substring(0,200)}
-AI: ${aiReply.substring(0,300)}
+  // Better prompt - context-aware, engaging suggestions
+  const prompt = 'Conversation context:
+User ne kaha: '+lastUser.substring(0,200)+'
+AI ne jawab diya: '+aiReply.substring(0,400)+'
 
-Generate exactly 3 short follow-up questions the user might want to ask next. 
+Ab user ke liye 3 ENGAGING follow-up suggestions banao jo unhe click karne ka mann kare.
 Rules:
-- Each question max 8 words
-- In same language as conversation (Hindi/English/Hinglish)  
-- Relevant and useful
-- No numbering, no bullets
-- Return ONLY the 3 questions, one per line, nothing else`;
+- Language: '+convLang+'
+- Har suggestion alag angle se ho (ek deep dive, ek practical, ek interesting twist)
+- Max 10 words each — punchy aur curiosity-inducing
+- Agar script/creative tha toh: variations, tips, ya related ideas suggest karo
+- NO generic suggestions like "aur batao" or "explain karo"
+- Return ONLY 3 suggestions, one per line, no numbering no bullets no extra text';
 
   try{
     const msgs=[{role:'user',content:prompt}];
     const raw = await smartCall(msgs);
-    const lines = raw.split('\n').map(l=>l.trim()).filter(l=>l.length>3&&l.length<80).slice(0,3);
+    const lines = raw.split('\n').map(l=>l.trim().replace(/^[-•*\d.]+\s*/,'')).filter(l=>l.length>5&&l.length<100).slice(0,3);
     if(lines.length<1) return;
     
-    // Render chips below last AI message
     const wrap=document.getElementById('msgs');
     const chipWrap=document.createElement('div');
     chipWrap.className='followup-wrap';
-    chipWrap.innerHTML=lines.map(q=>
-      `<button class="followup-chip" onclick="useFollowup(this,'${q.replace(/'/g,"\'")}')">💬 ${q}</button>`
+    // Vertical layout with icons based on position
+    const icons=['🔥','💡','✨'];
+    chipWrap.innerHTML=lines.map((q,i)=>
+      '<button class="followup-chip" onclick="useFollowup(this,''+q.replace(/'/g,"\'").replace(/"/g,'&quot;')+'')">'+icons[i]+' '+q+'</button>'
     ).join('');
     wrap.appendChild(chipWrap);
     const ca=document.getElementById('chatArea');
     if(ca)ca.scrollTop=ca.scrollHeight;
   }catch(e){
-    // Silent fail - suggestions are optional
+    // Silent fail
   }
 }
 
