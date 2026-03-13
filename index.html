@@ -334,11 +334,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--t1);display:flex;f
 .cbw,.code-block-wrap{border-radius:12px;overflow:hidden;border:1px solid #2d2f3e;margin:10px 0}
 body.light .cbw,.code-block-wrap{border-color:#e2e8f0}
 .mb code{background:rgba(255,255,255,.08);border-radius:5px;padding:2px 7px;font-size:12.5px;font-family:var(--mono);color:#e2e8f0}
-body.light 
-/* Code block wrapper */
-.cbw,.code-block-wrap{border-radius:12px;overflow:hidden;border:1px solid #2d2f3e;margin:10px 0}
-body.light .cbw,.code-block-wrap{border-color:#e2e8f0}
-.mb code{background:rgba(0,0,0,.08);color:#1e293b}
+body.light .mb code{background:rgba(0,0,0,.08);color:#1e293b}
 .mb pre,.cbw pre{background:#1a1b26;border-radius:0 0 12px 12px;overflow-x:auto;margin:0;padding:16px}
 .mb pre code,.cbw pre code{background:none!important;padding:0!important;font-size:13px!important;font-family:var(--mono)!important;line-height:1.7!important;color:#abb2bf!important;border-radius:0;white-space:pre}
 
@@ -1029,7 +1025,6 @@ async function doDeepResearch(query){
   reloadKeys();
   const key=KEYS.tavily;
   if(!key){
-    // Fallback: use AI without web search
     showToast('ℹ️ Tavily key nahi — AI se research kar raha hun...');
     return null;
   }
@@ -1042,20 +1037,11 @@ async function doDeepResearch(query){
     });
     const d=await r.json();
     if(d.error)throw new Error(d.error);
-    // Build context from results
-    let ctx='Web se mili information:
-
-';
-    if(d.answer)ctx+='Summary: '+d.answer+'
-
-';
+    let ctx='Web se mili information:\n\n';
+    if(d.answer)ctx+='Summary: '+d.answer+'\n\n';
     if(d.results){
       d.results.slice(0,5).forEach((res,i)=>{
-        ctx+=(i+1)+'. '+res.title+'
-'+res.content.slice(0,300)+'...
- Source: '+res.url+'
-
-';
+        ctx+=(i+1)+'. '+res.title+'\n'+res.content.slice(0,300)+'...\n Source: '+res.url+'\n\n';
       });
     }
     return ctx;
@@ -2026,15 +2012,7 @@ async function sendMsg(){
     generating=true;
     const webCtx=await doDeepResearch(text);
     // Build enhanced message with web context
-    const researchMsg=webCtx
-      ? 'Web research results:
-
-'+webCtx+'
-
-User ka sawal: '+text+'
-
-In results ke basis pe comprehensive answer do. Sources mention karo.'
-      : text;
+    const researchMsg=webCtx ? 'Web research results:\n\n'+webCtx+'\n\nUser ka sawal: '+text+'\n\nSources mention karo.' : text;
     try{
       chatMsgs.push({role:'user',content:researchMsg});
       const reply=await smartCall(chatMsgs.slice(-8));
