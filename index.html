@@ -1720,8 +1720,8 @@ function loadAdminNav(section){
                 5️⃣ Client ID copy karo → neeche paste karo
               </div>
             </div>
-            <input class="a-inp" id="gcid-inp" placeholder="XXXXX.apps.googleusercontent.com" value="${set.gcid||\'\'}"/>
-            <div style="font-size:11px;color:${set.gcid?\'#10b981\':\'var(--t3)\'}">${set.gcid?\'✅ Google Login ON hai\':\'❌ Client ID daalo — tab Google button dikhega\'}</div>
+            <input class="a-inp" id="gcid-inp" placeholder="XXXXX.apps.googleusercontent.com" value="${set.gcid||''}" style="width:100%;box-sizing:border-box"/>
+            <div style="font-size:11px;margin-top:4px;color:${set.gcid?'#10b981':'var(--t3)'}">${set.gcid?'✅ Google Login active':'❌ Client ID daalo tab Google button dikhega'}</div>
           </div>
         </div>
         <div style="margin-top:14px">
