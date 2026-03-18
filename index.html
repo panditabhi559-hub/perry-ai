@@ -566,6 +566,40 @@ body.light .plus-feat:hover{background:rgba(0,0,0,.05)}
 .followup-chip:active{transform:scale(.97)}
 @media(max-width:768px){.followup-wrap{padding:6px 0 8px 10px}}
 
+/* Streaming cursor */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.cursor-blink{display:inline-block;color:var(--ac);animation:blink .7s infinite;font-weight:300;margin-left:1px}
+
+/* Enhanced Markdown styles */
+.md-h1{font-size:20px;font-weight:700;margin:12px 0 6px;color:var(--t1);line-height:1.3}
+.md-h2{font-size:17px;font-weight:700;margin:10px 0 5px;color:var(--t1);line-height:1.3}
+.md-h3{font-size:15px;font-weight:600;margin:8px 0 4px;color:var(--t1)}
+.md-p{margin:4px 0;line-height:1.75}
+.md-p:first-child{margin-top:0}.md-p:last-child{margin-bottom:0}
+.md-ul,.md-ol{margin:6px 0 6px 18px;padding:0;line-height:1.8}
+.md-ul li{list-style:disc}.md-ol li{list-style:decimal}
+.md-bq{border-left:3px solid var(--ac);margin:8px 0;padding:6px 12px;color:var(--t2);font-style:italic;background:var(--card2);border-radius:0 6px 6px 0}
+.md-hr{border:none;border-top:1px solid var(--b);margin:12px 0}
+.md-ic{background:rgba(255,255,255,.1);border:1px solid var(--b);border-radius:4px;padding:1px 6px;font-size:12.5px;font-family:var(--mono);color:#e2e8f0}
+body.light .md-ic{background:rgba(0,0,0,.06);color:#1e293b}
+.md-table-wrap{overflow-x:auto;margin:10px 0;border-radius:8px;border:1px solid var(--b)}
+.md-table{width:100%;border-collapse:collapse;font-size:13px}
+.md-table th{background:var(--card2);padding:8px 12px;text-align:left;font-weight:600;font-size:12px;color:var(--t2);border-bottom:1px solid var(--b)}
+.md-table td{padding:7px 12px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--t1)}
+.md-table tr:last-child td{border-bottom:none}
+.md-table tr:hover td{background:rgba(255,255,255,.03)}
+body.light .md-table td{border-bottom-color:rgba(0,0,0,.05)}
+body.light .md-table tr:hover td{background:rgba(0,0,0,.02)}
+
+/* Stop button */
+.stop-btn{display:none;align-items:center;gap:7px;margin:0 auto 8px;padding:8px 20px;background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.3);border-radius:20px;color:var(--red);font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font);transition:all .2s}
+.stop-btn:hover{background:rgba(244,63,94,.2)}
+.stop-btn.show{display:flex}
+
+/* Like/Dislike buttons */
+.mact.liked{color:#10b981}
+.mact.disliked{color:var(--red)}
+
 </style>
 </head>
 <body>
@@ -711,6 +745,7 @@ body.light .plus-feat:hover{background:rgba(0,0,0,.05)}
       </div>
       <div class="top-bar-r">
         <button class="theme-btn" onclick="openVoiceSettings()" title="Awaaz Settings" style="display:none" id="voiceSettBtn">🔊</button>
+        <button class="theme-btn" onclick="exportChat()" title="Chat Export karo" style="font-size:14px">📥</button>
         <button class="theme-btn" onclick="toggleTheme()" id="themeBtn" title="Day/Night mode">🌙</button>
         <button class="ib" onclick="newChat()" title="New Chat" style="font-size:16px">✏️</button>
         <div style="position:relative">
@@ -930,6 +965,45 @@ function reloadKeys(){
   KEYS.gemini=localStorage.getItem('pk_gm')||'';
   KEYS.stability=localStorage.getItem('pk_st')||'';
   KEYS.tavily=localStorage.getItem('pk_tv')||'';
+}
+
+let stopRequested=false;
+
+function stopGeneration(){
+  stopRequested=true;
+  document.getElementById('stopBtn').classList.remove('show');
+}
+
+function showStopBtn(){
+  stopRequested=false;
+  const btn=document.getElementById('stopBtn');
+  if(btn)btn.classList.add('show');
+}
+
+function hideStopBtn(){
+  const btn=document.getElementById('stopBtn');
+  if(btn)btn.classList.remove('show');
+}
+
+async function autoGenerateTitle(firstMsg){
+  if(!curHid)return;
+  try{
+    const prompt='Chat ka ek short title banao (max 5 words) is message ke liye: '+firstMsg.substring(0,100)+'. ONLY title do, kuch aur nahi.';
+    const title=await smartCall([{role:'user',content:prompt}]);
+    const cleanTitle=title.trim().replace(/["\']/g,'').substring(0,40);
+    if(cleanTitle&&curHid){
+      // Update in history
+      const uname=curUser?.username||'guest';
+      let hist=LS('perry_hist_'+uname,[]);
+      const hidx=hist.findIndex(h=>h.id===curHid);
+      if(hidx!==-1){
+        hist[hidx].title=cleanTitle;
+        LS_set('perry_hist_'+uname,hist);
+        userHist=hist;
+        loadHistList();
+      }
+    }
+  }catch(e){}
 }
 let curProvIdx = LS('pk_cur',0);
 
@@ -1159,6 +1233,101 @@ const PROVIDERS = [
 
 function getAvail(){return PROVIDERS.filter(p=>KEYS[p.id]);}
 function getCurProv(){const a=getAvail();return a.length?a[curProvIdx%a.length]:null;}
+
+// ════════════════════════════════════════════════════════
+// STREAMING CALL
+// ════════════════════════════════════════════════════════
+async function streamCall(msgs, onChunk){
+  reloadKeys();
+  const avail=getAvail();
+  if(!avail.length){openKeysModal();throw new Error('Koi API key nahi!');}
+  const sys=getSystemPrompt();
+
+  // Try each provider - prefer streaming-capable ones first
+  const streamProviders=['groq','openrouter','gemini'];
+  const ordered=[...avail].sort((a,b)=>streamProviders.indexOf(a.id)-streamProviders.indexOf(b.id));
+
+  for(const prov of ordered){
+    try{
+      if(prov.id==='groq'){
+        const p=PROVIDERS.find(x=>x.id==='groq');
+        const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+KEYS.groq},
+          body:JSON.stringify({model:p.models[p.mIdx],max_tokens:1400,stream:true,messages:[{role:'system',content:sys},...msgs]})
+        });
+        if(!r.ok)throw new Error('Groq '+r.status);
+        return await readSSEStream(r, onChunk);
+      }
+      if(prov.id==='openrouter'){
+        const p=PROVIDERS.find(x=>x.id==='openrouter');
+        const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':'Bearer '+KEYS.openrouter,'HTTP-Referer':'https://perry-ai.vercel.app','X-Title':'PerryAI'},
+          body:JSON.stringify({model:p.models[p.mIdx],max_tokens:1400,stream:true,messages:[{role:'system',content:sys},...msgs]})
+        });
+        if(!r.ok)throw new Error('OR '+r.status);
+        return await readSSEStream(r, onChunk);
+      }
+      if(prov.id==='gemini'){
+        const gc=[];
+        for(let i=0;i<msgs.length;i++){
+          const role=msgs[i].role==='assistant'?'model':'user';
+          if(gc.length>0&&gc[gc.length-1].role===role)gc[gc.length-1].parts[0].text+='\n'+msgs[i].content;
+          else gc.push({role,parts:[{text:msgs[i].content}]});
+        }
+        const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key='+KEYS.gemini,{
+          method:'POST',headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({systemInstruction:{parts:[{text:sys}]},contents:gc,generationConfig:{maxOutputTokens:1400}})
+        });
+        if(!r.ok)throw new Error('Gemini '+r.status);
+        return await readSSEStream(r, onChunk, 'gemini');
+      }
+      // Fallback: non-streaming
+      const reply=await prov.call(msgs,sys,KEYS[prov.id]);
+      // Simulate streaming for non-streaming providers
+      const words=reply.split(' ');
+      for(let i=0;i<words.length;i++){
+        onChunk((i===0?'':' ')+words[i]);
+        if(i%3===0)await new Promise(r=>setTimeout(r,18));
+      }
+      return reply;
+    }catch(e){
+      if(ordered.indexOf(prov)===ordered.length-1)throw e;
+      continue;
+    }
+  }
+}
+
+async function readSSEStream(response, onChunk, type='openai'){
+  const reader=response.body.getReader();
+  const decoder=new TextDecoder();
+  let full='';
+  let buf='';
+  while(true){
+    const {done,value}=await reader.read();
+    if(done)break;
+    buf+=decoder.decode(value,{stream:true});
+    const lines=buf.split('\n');
+    buf=lines.pop()||'';
+    for(const line of lines){
+      if(!line.startsWith('data:'))continue;
+      const data=line.slice(5).trim();
+      if(data==='[DONE]')continue;
+      try{
+        const j=JSON.parse(data);
+        let chunk='';
+        if(type==='gemini'){
+          chunk=j.candidates?.[0]?.content?.parts?.[0]?.text||'';
+        }else{
+          chunk=j.choices?.[0]?.delta?.content||'';
+        }
+        if(chunk){full+=chunk;onChunk(chunk);}
+      }catch(e){}
+    }
+  }
+  return full;
+}
 
 function getSystemPrompt(){
   const u = curUser;
@@ -2067,13 +2236,32 @@ async function sendMsg(){
   const tid=showTyping();
   generating=true;
   document.getElementById('sendBtn').disabled=true;
+  showStopBtn();
   try{
-    const reply=await smartCall(chatMsgs.slice(-16));
-    chatMsgs.push({role:'assistant',content:reply});
-    const {id:msgId}=renderMsg('ai',reply);
+    // Create empty AI message bubble first
+    const {id:msgId,div:msgDiv}=renderMsg('ai','');
+    const mbEl=document.getElementById(msgId);
+    removeTyping(typId);
+    let fullReply='';
+    let rawText='';
+    // Stream chunk by chunk
+    await streamCall(chatMsgs.slice(-16),(chunk)=>{
+      if(stopRequested)return;
+      rawText+=chunk;
+      fullReply=rawText;
+      if(mbEl)mbEl.innerHTML=fmt(rawText)+'<span class="cursor-blink">▍</span>';
+      const ca=document.getElementById('chatArea');
+      if(ca)ca.scrollTop=ca.scrollHeight;
+    });
+    // Final render without cursor
+    if(mbEl)mbEl.innerHTML=fmt(fullReply);
+    hideStopBtn();
+    chatMsgs.push({role:'assistant',content:fullReply});
     saveHistMsgs();
+    // Auto title on first message
+    if(chatMsgs.filter(m=>m.role==='user').length===1)setTimeout(()=>autoGenerateTitle(text),500);
     // Generate follow-up suggestions
-    setTimeout(()=>generateFollowups(reply),400);
+    setTimeout(()=>generateFollowups(fullReply),400);
     // Auto-speak if voice mode active
     if(perryVoice.enabled){
       setTimeout(()=>{
@@ -2114,7 +2302,7 @@ function renderMsg(role,text){
   }else{avHtml='<div class="av aav" style="display:flex;align-items:center;justify-content:center">🤖</div>';}
   div.innerHTML=isUser
     ?`${avHtml}<div class="mc"><div class="mb" id="${id}">${fmt(text)}</div></div>`
-    :`${avHtml}<div class="mc"><div class="mb" id="${id}">${fmt(text)}</div><div class="macts"><button class="mact" onclick="copyMsg('${id}')">📋 Copy</button><button class="mact" onclick="speakMsg('${id}')">🔊 Suno</button></div></div>`;
+    :`${avHtml}<div class="mc"><div class="mb" id="${id}">${fmt(text)}</div><div class="macts"><button class="mact" onclick="copyMsg('${id}')" title="Copy">📋</button><button class="mact" onclick="likeMsg(this)" title="Accha jawab">👍</button><button class="mact" onclick="dislikeMsg(this)" title="Bura jawab">👎</button><button class="mact" onclick="speakMsg('${id}')" title="Suno">🔊</button></div></div>`;
   wrap.appendChild(div);
   const ca=document.getElementById("chatArea");if(ca)ca.scrollTop=ca.scrollHeight;
   return {id, wrap, div};
@@ -2134,7 +2322,6 @@ function fmt(t){
       var lang=p.lang;
       var names={'python':'Python','javascript':'JavaScript','js':'JavaScript','html':'HTML','css':'CSS','java':'Java','cpp':'C++','c':'C','php':'PHP','sql':'SQL','bash':'Bash','sh':'Shell','json':'JSON','typescript':'TypeScript','ts':'TypeScript','kotlin':'Kotlin','swift':'Swift','go':'Go','rust':'Rust','ruby':'Ruby'};
       var dLang=names[lang]||lang||'Code';
-      // Simple syntax highlight - no external lib
       var hi=simpleHL(p.val, lang);
       window._cb=window._cb||{};
       var uid='cb'+Date.now().toString(36)+Math.random().toString(36).substr(2,4);
@@ -2147,12 +2334,50 @@ function fmt(t){
         +'<pre><code>'+hi+'</code></pre>'
         +'</div>';
     }
-    return p.val
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-      .replace(/`([^`\n]+)`/g,'<code>$1</code>')
-      .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g,'<em>$1</em>')
-      .replace(/\n/g,'<br>');
+    // ── Enhanced markdown rendering ──
+    var h=p.val
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    // Tables
+    h=h.replace(/([^\n]+\|[^\n]+\n)((?:[^\n]+\|[^\n]+\n?)+)/g,function(match){
+      var rows=match.trim().split('\n');
+      var html='<div class="md-table-wrap"><table class="md-table">';
+      rows.forEach(function(row,ri){
+        if(/^[\s|:-]+$/.test(row))return;
+        var cells=row.split('|').filter(function(c,i,a){return i>0&&i<a.length-1||a.length<=2;}).map(function(c){return c.trim();});
+        if(cells.length===0){cells=row.split('|').map(function(c){return c.trim();}).filter(Boolean);}
+        var tag=ri===0?'th':'td';
+        html+='<tr>'+cells.map(function(c){return '<'+tag+'>'+c+'</'+tag+'>';}).join('')+'</tr>';
+      });
+      return html+'</table></div>';
+    });
+    // Headings
+    h=h.replace(/^### (.+)$/gm,'<h3 class="md-h3">$1</h3>');
+    h=h.replace(/^## (.+)$/gm,'<h2 class="md-h2">$1</h2>');
+    h=h.replace(/^# (.+)$/gm,'<h1 class="md-h1">$1</h1>');
+    // Blockquote
+    h=h.replace(/^&gt; (.+)$/gm,'<blockquote class="md-bq">$1</blockquote>');
+    // Horizontal rule
+    h=h.replace(/^---+$/gm,'<hr class="md-hr">');
+    // Bold, italic, strikethrough, inline code
+    h=h.replace(/`([^`\n]+)`/g,'<code class="md-ic">$1</code>');
+    h=h.replace(/\*\*\*(.*?)\*\*\*/g,'<strong><em>$1</em></strong>');
+    h=h.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    h=h.replace(/\*(.*?)\*/g,'<em>$1</em>');
+    h=h.replace(/~~(.*?)~~/g,'<s>$1</s>');
+    // Unordered lists
+    h=h.replace(/((?:^[\s]*[-*+] .+\n?)+)/gm,function(block){
+      var items=block.trim().split('\n').map(function(l){return '<li>'+l.replace(/^[\s]*[-*+] /,'')+'</li>';});
+      return '<ul class="md-ul">'+items.join('')+'</ul>';
+    });
+    // Ordered lists
+    h=h.replace(/((?:^[\s]*\d+\. .+\n?)+)/gm,function(block){
+      var items=block.trim().split('\n').map(function(l){return '<li>'+l.replace(/^[\s]*\d+\. /,'')+'</li>';});
+      return '<ol class="md-ol">'+items.join('')+'</ol>';
+    });
+    // Line breaks
+    h=h.replace(/\n\n/g,'</p><p class="md-p">');
+    h=h.replace(/\n/g,'<br>');
+    return '<p class="md-p">'+h+'</p>';
   }).join('');
 }
 
@@ -2256,6 +2481,29 @@ function showTyping(){
   return id;
 }
 function removeTyping(id){document.getElementById(id)?.remove();}
+function likeMsg(btn){
+  btn.classList.toggle('liked');
+  btn.textContent=btn.classList.contains('liked')?'👍✓':'👍';
+  if(btn.classList.contains('liked'))showToast('Feedback saved! ✅');
+}
+function dislikeMsg(btn){
+  btn.classList.toggle('disliked');
+  btn.textContent=btn.classList.contains('disliked')?'👎✓':'👎';
+  if(btn.classList.contains('disliked'))showToast('Feedback noted. Hum improve karenge!');
+}
+
+function exportChat(){
+  if(!chatMsgs.length){showToast('Koi chat nahi export karne ke liye!');return;}
+  const lines=chatMsgs.map(m=>(m.role==='user'?'You: ':'PerryAI: ')+m.content).join('\n\n');
+  const blob=new Blob([lines],{type:'text/plain'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='PerryAI_Chat_'+Date.now()+'.txt';
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+  showToast('✅ Chat exported!');
+}
+
 function copyMsg(id){navigator.clipboard.writeText(document.getElementById(id)?.innerText||'');showToast('📋 Copied!');}
 let ttsU=null;
 let ttsBtn=null; // track which button is speaking
