@@ -369,6 +369,20 @@ body.light .code-lang{color:#64748b}
 .sk-l2{width:100%;animation-delay:.15s}
 .sk-l3{width:60%;animation-delay:.3s}
 
+/* ── Thinking animation ── */
+.think-wrap{display:flex;flex-direction:column;gap:8px;padding:12px 16px;background:var(--card);border:1px solid var(--b);border-radius:16px;border-bottom-left-radius:3px;min-width:160px}
+.think-dots{display:flex;gap:5px;align-items:center}
+.think-dots span{width:7px;height:7px;border-radius:50%;background:var(--ac);display:inline-block;animation:think-bounce 1.2s infinite ease-in-out}
+.think-dots span:nth-child(1){animation-delay:0s}
+.think-dots span:nth-child(2){animation-delay:.2s;background:var(--ac);opacity:.7}
+.think-dots span:nth-child(3){animation-delay:.4s;background:var(--ac);opacity:.4}
+@keyframes think-bounce{0%,80%,100%{transform:scale(0.6);opacity:.4}40%{transform:scale(1);opacity:1}}
+.think-label{font-size:12px;color:var(--t2);transition:opacity .2s;font-style:italic}
+
+/* ── Typing cursor ── */
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.cursor-blink{display:inline-block;width:2px;height:1em;background:var(--ac);border-radius:1px;animation:blink .6s infinite;vertical-align:text-bottom;margin-left:2px}
+
 /* Input */
 .inp-area{padding:10px 16px calc(14px + env(safe-area-inset-bottom,0px));flex-shrink:0;background:transparent;position:relative}
 .inp-box{background:#1c1c1e;border:1.5px solid #3a3a3c;border-radius:28px;display:flex;align-items:flex-end;gap:0;padding:6px 6px 6px 6px;transition:border-color .2s}
@@ -794,6 +808,7 @@ body.light .md-table tr:hover td{background:rgba(0,0,0,.02)}
     </div>
     <!-- Attachment preview bar -->
     <div class="att-bar" id="attBar" style="display:none"></div>
+    <button class="stop-btn" id="stopBtn" onclick="stopGeneration()">⏹ Generation rok do</button>
     <div class="inp-area" style="position:relative">
       <!-- ChatGPT-style + Popup Menu -->
       <div class="plus-menu" id="plusMenu" style="display:none">
@@ -2306,13 +2321,44 @@ async function sendMsg(){
     let fullReply='';
     let rawText='';
     // Stream chunk by chunk
+    let typeQueue='';
+    let isTyping=false;
+    function flushType(){
+      if(isTyping||!typeQueue)return;
+      isTyping=true;
+      // Type characters with small delay for natural feel
+      function typeNext(){
+        if(stopRequested||!typeQueue){isTyping=false;return;}
+        const ch=typeQueue[0];
+        typeQueue=typeQueue.slice(1);
+        rawText+=ch;
+        if(mbEl)mbEl.innerHTML=streamFmt(rawText)+'<span class="cursor-blink">▍</span>';
+        const ca=document.getElementById('chatArea');
+        if(ca)ca.scrollTop=ca.scrollHeight;
+        // Vary speed: slower on punctuation, faster on spaces
+        const delay='.!?,;:'.includes(ch)?55:ch===' '?12:18;
+        if(typeQueue.length>30){
+          // If queue building up, batch process to avoid lag
+          rawText+=typeQueue;typeQueue='';
+          if(mbEl)mbEl.innerHTML=streamFmt(rawText)+'<span class="cursor-blink">▍</span>';
+          if(ca)ca.scrollTop=ca.scrollHeight;
+          isTyping=false;
+          return;
+        }
+        setTimeout(typeNext,delay);
+      }
+      typeNext();
+    }
     await streamCall(chatMsgs.slice(-16),(chunk)=>{
       if(stopRequested)return;
-      rawText+=chunk;
-      fullReply=rawText;
-      if(mbEl)mbEl.innerHTML=fmt(rawText)+'<span class="cursor-blink">▍</span>';
-      const ca=document.getElementById('chatArea');
-      if(ca)ca.scrollTop=ca.scrollHeight;
+      fullReply+=chunk;
+      typeQueue+=chunk;
+      flushType();
+    });
+    // Wait for typing queue to finish
+    await new Promise(res=>{
+      const wait=()=>{if(!typeQueue&&!isTyping)res();else setTimeout(wait,50);};
+      wait();
     });
     // Final render without cursor
     if(mbEl)mbEl.innerHTML=fmt(fullReply);
@@ -2369,6 +2415,15 @@ function renderMsg(role,text){
   return {id, wrap, div};
 }
 
+function streamFmt(t){
+  var s=t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  s=s.replace(/`([^`]+)`/g,'<code class="md-ic">$1</code>');
+  s=s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  s=s.replace(/\*([^*]+)\*/g,'<em>$1</em>');
+  s=s.replace(/\n/g,'<br>');
+  return s;
+}
+
 function fmt(t){
   var parts=[], last=0;
   var re=/```(\w*)\n?([\s\S]*?)```/g, m;
@@ -2385,6 +2440,9 @@ function fmt(t){
       var dLang=names[lang]||lang||'Code';
       var hi=simpleHL(p.val, lang);
       window._cb=window._cb||{};
+      // Cleanup old entries to prevent memory leak
+      const cbKeys=Object.keys(window._cb);
+      if(cbKeys.length>50)cbKeys.slice(0,20).forEach(k=>delete window._cb[k]);
       var uid='cb'+Date.now().toString(36)+Math.random().toString(36).substr(2,4);
       window._cb[uid]=p.val;
       return '<div class="cbw">'
@@ -2537,17 +2595,29 @@ function showTyping(){
   const d=document.createElement('div');
   d.className='typing-row';d.id=id;
   d.innerHTML='<div class="av aav" style="display:flex;align-items:center;justify-content:center">🤖</div>'
-    +'<div class="sk-wrap">'
-    +'<div class="sk-line sk-l1"></div>'
-    +'<div class="sk-line sk-l2"></div>'
-    +'<div class="sk-line sk-l3"></div>'
+    +'<div class="think-wrap" id="think_'+id+'">'
+    +'<div class="think-dots"><span></span><span></span><span></span></div>'
+    +'<div class="think-label" id="thinklbl_'+id+'">Soch raha hun...</div>'
     +'</div>';
   wrap.appendChild(d);
   const ca=document.getElementById('chatArea');
   if(ca)ca.scrollTop=ca.scrollHeight;
+  // Cycle through thinking messages
+  const msgs=['Soch raha hun...','Samajh raha hun...','Jawab tayar kar raha hun...','Likh raha hun...'];
+  let mi=0;
+  const lbl=document.getElementById('thinklbl_'+id);
+  const interval=setInterval(()=>{
+    mi=(mi+1)%msgs.length;
+    if(lbl){lbl.style.opacity='0';setTimeout(()=>{if(lbl){lbl.textContent=msgs[mi];lbl.style.opacity='1';}},200);}
+    else clearInterval(interval);
+  },1200);
+  d._thinkInterval=interval;
   return id;
 }
-function removeTyping(id){document.getElementById(id)?.remove();}
+function removeTyping(id){
+  const el=document.getElementById(id);
+  if(el){if(el._thinkInterval)clearInterval(el._thinkInterval);el.remove();}
+}
 function likeMsg(btn){
   btn.classList.toggle('liked');
   btn.textContent=btn.classList.contains('liked')?'👍✓':'👍';
