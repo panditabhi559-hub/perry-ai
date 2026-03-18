@@ -2600,18 +2600,7 @@ async function generateFollowups(aiReply){
   const convLang = isHindi(lastUser) ? 'Hindi' : (lastUser.match(/[a-zA-Z]/) ? 'Hinglish ya English' : 'Hindi');
   
   // Better prompt - context-aware, engaging suggestions
-  const prompt = 'Conversation context:
-User ne kaha: '+lastUser.substring(0,200)+'
-AI ne jawab diya: '+aiReply.substring(0,400)+'
-
-Ab user ke liye 3 ENGAGING follow-up suggestions banao jo unhe click karne ka mann kare.
-Rules:
-- Language: '+convLang+'
-- Har suggestion alag angle se ho (ek deep dive, ek practical, ek interesting twist)
-- Max 10 words each — punchy aur curiosity-inducing
-- Agar script/creative tha toh: variations, tips, ya related ideas suggest karo
-- NO generic suggestions like "aur batao" or "explain karo"
-- Return ONLY 3 suggestions, one per line, no numbering no bullets no extra text';
+  const prompt = 'Conversation:\nUser: '+lastUser.substring(0,150)+'\nAI: '+aiReply.substring(0,300)+'\n\nIs conversation ke basis pe 3 smart follow-up suggestions do jo user ko click karne ka mann kare. Language: '+convLang+'. Rules: alag angles (deep, practical, creative twist), max 10 words each, punchy, NO generic suggestions. ONLY 3 lines, no numbering, no extra text.';
 
   try{
     const msgs=[{role:'user',content:prompt}];
