@@ -2143,41 +2143,39 @@ function handleAtt(input,type){
 }
 
 function extractPdfText(arr, filename){
-  // Simple PDF text extractor - works for most text-based PDFs
   try{
     const str=new TextDecoder('latin1').decode(arr);
-    // Extract text between BT...ET blocks (PDF text objects)
     const texts=[];
-    const btRe=/BT[\s\S]*?ET/g;
-    let m;
-    while((m=btRe.exec(str))!==null){
-      // Extract strings from Tj and TJ operators
-      const tjRe=/\(([^)]*)\)\s*Tj/g;
-      const tjRe2=/\[((?:[^[\]]*(?:\([^)]*\))?)*)\]\s*TJ/g;
-      let tm;
-      while((tm=tjRe.exec(m[0]))!==null){
-        const t=tm[1].replace(/\\n/g,' ').replace(/\n/g,' ').replace(/\r/g,' ').replace(/\\(/g,'(').replace(/\\)/g,')').trim();
-        if(t.length>1)texts.push(t);
-      }
+    // Find all parenthesized strings followed by Tj (PDF text operator)
+    let i=0;
+    while(i<str.length-3){
+      if(str[i]==='(' ){
+        let j=i+1, s='';
+        while(j<str.length && str[j]!==')'){
+          if(str[j]==='\\'){j++;} // skip escape
+          s+=str[j];j++;
+        }
+        // Check if Tj follows within 20 chars
+        const after=str.substring(j+1,j+20).trimStart();
+        if(after.startsWith('Tj') && s.length>0 && s.length<200){
+          const clean=s.replace(/\s+/g,' ').trim();
+          if(clean.length>1)texts.push(clean);
+        }
+        i=j+1;
+      } else {i++;}
     }
     let extracted=texts.join(' ').replace(/\s+/g,' ').trim();
-    
-    // If no text extracted (scanned PDF), use filename
-    if(extracted.length<50){
-      extracted='[PDF file: '+filename+'. Yeh ek scanned ya image-based PDF hai jise directly read nahi kar sakta. Please text content paste karo.]';
+    if(extracted.length<30){
+      extracted='[PDF: '+filename+' — Text extract nahi hua. Scanned PDF ho sakta hai. Content copy-paste karke bhejo.]';
     }
-    
-    // Limit to 8000 chars
-    if(extracted.length>8000)extracted=extracted.substring(0,8000)+'... [truncated]';
-    
+    if(extracted.length>6000)extracted=extracted.substring(0,6000)+'... [aur content hai]';
     attachments.push({type:'pdf',name:filename,content:extracted,preview:null,size:arr.length});
     renderAttBar();
-    showToast('✅ PDF ready! '+Math.round(extracted.length/100)/10+'k chars');
+    showToast('PDF ready — '+Math.round(extracted.length/100)/10+'k chars extracted');
   }catch(e){
-    // Fallback
-    attachments.push({type:'pdf',name:filename,content:'[PDF: '+filename+' - Content extract nahi hua. Please copy-paste karo.]',preview:null});
+    attachments.push({type:'pdf',name:filename,content:'[PDF: '+filename+']',preview:null});
     renderAttBar();
-    showToast('⚠️ PDF partial read');
+    showToast('PDF added (basic mode)');
   }
 }
 function renderAttBar(){
