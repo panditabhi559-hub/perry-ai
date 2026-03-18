@@ -2611,11 +2611,14 @@ async function generateFollowups(aiReply){
     const wrap=document.getElementById('msgs');
     const chipWrap=document.createElement('div');
     chipWrap.className='followup-wrap';
-    // Vertical layout with icons based on position
     const icons=['🔥','💡','✨'];
-    chipWrap.innerHTML=lines.map((q,i)=>
-      '<button class="followup-chip" onclick="useFollowup(this,''+q.replace(/'/g,"\'").replace(/"/g,'&quot;')+'')">'+icons[i]+' '+q+'</button>'
-    ).join('');
+    lines.forEach((q,i)=>{
+      const btn=document.createElement('button');
+      btn.className='followup-chip';
+      btn.textContent=icons[i]+' '+q;
+      btn.onclick=function(){useFollowup(this,q);};
+      chipWrap.appendChild(btn);
+    });
     wrap.appendChild(chipWrap);
     const ca=document.getElementById('chatArea');
     if(ca)ca.scrollTop=ca.scrollHeight;
@@ -3038,28 +3041,4 @@ function showToast(m){
 <div class="voice-status" id="voiceStatus"></div>
 
 </body>
-</html>/* ── Input Area ── */
-.inp-area{padding:10px 16px 14px;background:transparent;position:relative;flex-shrink:0}
-.inp-box{display:flex;align-items:flex-end;gap:0;background:#1c1c1e;border-radius:28px;padding:6px 6px 6px 14px;border:1.5px solid #3a3a3c;transition:border-color .2s}
-body.light .inp-box{background:#f0f0f0;border-color:#d1d1d6}
-.inp-box:focus-within{border-color:#5a5a5e}
-.chat-inp{flex:1;background:transparent;border:none;outline:none;color:var(--t1);font-size:16px;font-family:var(--font);resize:none;max-height:180px;line-height:1.5;padding:6px 8px;min-height:28px}
-.chat-inp::placeholder{color:#636366}
-body.light .chat-inp::placeholder{color:#8e8e93}
-.inp-btns{display:flex;align-items:center;gap:6px;flex-shrink:0}
-.plus-btn{width:34px;height:34px;border-radius:50%;border:none;background:transparent;color:#8e8e93;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;padding:0;margin-right:2px}
-.plus-btn:hover{color:var(--t1)}
-.plus-btn.open{transform:rotate(45deg);color:var(--t1)}
-
-/* Mic button - grey circle */
-.voice-call-btn{width:36px;height:36px;border-radius:50%;border:none;background:#636366;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
-.voice-call-btn:hover{background:#8e8e93}
-.voice-call-btn.vc-on{background:#ef4444;box-shadow:0 0 14px rgba(239,68,68,.5)}
-
-/* Send button - white circle */
-.send-btn{width:36px;height:36px;border-radius:50%;border:none;background:#fff;color:#000;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
-body.light .send-btn{background:#1c1c1e;color:#fff}
-.send-btn:hover{transform:scale(1.05)}
-.send-btn:active{transform:scale(.95)}
-
-
+</html>
