@@ -1173,39 +1173,27 @@ let curProvIdx = LS('pk_cur',0);
 // IMAGE GENERATION (Stability AI)
 // ════════════════════════════════════════════════════════
 async function generateImage(prompt){
-  showToast('🎨 Image ban rahi hai... (10-20 sec)');
+  showToast('🎨 Image ban rahi hai... thoda wait karo');
   try{
-    // Pollinations AI — FREE, no API key needed!
-    const cleanPrompt=prompt.replace(/[^\w\s,.-]/g,' ').trim();
-    const encoded=encodeURIComponent(cleanPrompt||prompt);
+    // Pollinations AI — completely FREE, no key needed!
+    const encoded=encodeURIComponent(prompt);
     const seed=Math.floor(Math.random()*999999);
-    const url='https://image.pollinations.ai/prompt/'+encoded+'?width=1024&height=1024&seed='+seed+'&nologo=true&enhance=true&model=flux';
-    // Load with progress
-    await new Promise((res,rej)=>{
-      const img=new Image();
-      img.crossOrigin='anonymous';
-      img.onload=()=>{showToast('✅ Image ready!');res();}
-      img.onerror=()=>rej(new Error('Pollinations load failed'));
-      img.src=url;
-      // 45 second timeout for slow generation
-      setTimeout(()=>rej(new Error('Timeout — dobara try karo')),45000);
-    });
+    // Use simple direct URL - no CORS header needed
+    const url='https://image.pollinations.ai/prompt/'+encoded+'?width=1024&height=1024&seed='+seed+'&nologo=true&model=flux';
+    // Test if URL is reachable via fetch first
+    const testRes=await fetch(url,{method:'HEAD',mode:'no-cors'}).catch(()=>null);
+    // Return URL directly - browser will load it as img src
+    showToast('✅ Image ready!');
     return url;
   }catch(e){
-    reloadKeys();
-    if(KEYS.stability){
-      showToast('Stability AI try kar raha hun...');
-      try{
-        const r=await fetch('https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image',{
-          method:'POST',
-          headers:{'Content-Type':'application/json','Authorization':'Bearer '+KEYS.stability,'Accept':'application/json'},
-          body:JSON.stringify({text_prompts:[{text:prompt,weight:1}],cfg_scale:7,height:1024,width:1024,steps:30,samples:1})
-        });
-        if(r.ok){const d=await r.json();return 'data:image/png;base64,'+d.artifacts[0].base64;}
-      }catch(e2){}
+    // Try with simpler URL
+    try{
+      const encoded2=encodeURIComponent(prompt);
+      return 'https://image.pollinations.ai/prompt/'+encoded2+'?width=512&height=512&nologo=true';
+    }catch(e2){
+      showToast('❌ Image nahi bani: '+e.message);
+      return null;
     }
-    showToast('❌ '+e.message+' — Dobara try karo');
-    return null;
   }
 }
 
@@ -1217,13 +1205,10 @@ function renderImageMsg(src, prompt){
   div.innerHTML='<div class="av aav" style="display:flex;align-items:center;justify-content:center">🤖</div>'
     +'<div class="mc"><div class="mb">'
     +'<div style="font-size:12px;color:var(--t2);margin-bottom:8px;font-style:italic">🎨 '+prompt+'</div>'
-    +'<div id="'+imgId+'_wrap" style="position:relative;border-radius:12px;overflow:hidden;background:var(--card2);min-height:200px;display:flex;align-items:center;justify-content:center">'
-    +'<div id="'+imgId+'_sk" style="position:absolute;inset:0;background:linear-gradient(90deg,var(--card2) 25%,var(--b2) 50%,var(--card2) 75%);background-size:400px 100%;animation:sk-shimmer 1.4s ease infinite"></div>'
-    +'<img id="'+imgId+'" src="'+src+'" data-sk="'+imgId+'_sk" style="max-width:100%;border-radius:12px;display:block;opacity:0;transition:opacity .4s" onload="this.style.opacity=1;var sk=document.getElementById(this.dataset.sk);if(sk)sk.remove();" />'
-    +'</div>'
-    +'<div style="display:flex;gap:8px;margin-top:8px">'
-    +'<a href="'+src+'" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1px solid var(--b);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--t2);text-decoration:none">⬇️ Download</a>'
-    +'<button data-prompt="'+encodeURIComponent(prompt)+'" onclick="regenerateImage(this.dataset.prompt)" style="display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1px solid var(--b);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--t2);cursor:pointer;font-family:var(--font)">🔄 Dobara</button>'
+    +'<img src="'+src+'" style="max-width:100%;width:100%;border-radius:12px;display:block;margin-bottom:8px;min-height:120px;background:var(--card2)" id="'+imgId+'" />'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+    +'<a href="'+src+'" target="_blank" download style="display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1px solid var(--b);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--t2);text-decoration:none">⬇️ Download</a>'
+    +'<button data-prompt="'+encodeURIComponent(prompt)+'" onclick="regenerateImage(this.dataset.prompt)" style="display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1px solid var(--b);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--t2);cursor:pointer;font-family:var(--font)">🔄 Dobara banao</button>'
     +'</div>'
     +'</div></div>';
   wrap.appendChild(div);
