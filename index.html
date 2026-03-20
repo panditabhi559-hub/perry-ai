@@ -1173,38 +1173,38 @@ let curProvIdx = LS('pk_cur',0);
 // IMAGE GENERATION (Stability AI)
 // ════════════════════════════════════════════════════════
 async function generateImage(prompt){
-  showToast('🎨 Image ban rahi hai...');
+  showToast('🎨 Image ban rahi hai... (10-20 sec)');
   try{
-    // Pollinations AI — completely FREE, no key needed!
-    const encodedPrompt=encodeURIComponent(prompt);
+    // Pollinations AI — FREE, no API key needed!
+    const cleanPrompt=prompt.replace(/[^\w\s,.-]/g,' ').trim();
+    const encoded=encodeURIComponent(cleanPrompt||prompt);
     const seed=Math.floor(Math.random()*999999);
-    const url='https://image.pollinations.ai/prompt/'+encodedPrompt+'?width=1024&height=1024&seed='+seed+'&nologo=true&enhance=true';
-    // Pre-load image to check it works
+    const url='https://image.pollinations.ai/prompt/'+encoded+'?width=1024&height=1024&seed='+seed+'&nologo=true&enhance=true&model=flux';
+    // Load with progress
     await new Promise((res,rej)=>{
       const img=new Image();
-      img.onload=res;
-      img.onerror=()=>rej(new Error('Image load failed'));
+      img.crossOrigin='anonymous';
+      img.onload=()=>{showToast('✅ Image ready!');res();}
+      img.onerror=()=>rej(new Error('Pollinations load failed'));
       img.src=url;
-      setTimeout(()=>rej(new Error('Timeout')),30000);
+      // 45 second timeout for slow generation
+      setTimeout(()=>rej(new Error('Timeout — dobara try karo')),45000);
     });
     return url;
   }catch(e){
-    // Fallback: try Stability AI if key available
     reloadKeys();
     if(KEYS.stability){
+      showToast('Stability AI try kar raha hun...');
       try{
         const r=await fetch('https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image',{
           method:'POST',
           headers:{'Content-Type':'application/json','Authorization':'Bearer '+KEYS.stability,'Accept':'application/json'},
           body:JSON.stringify({text_prompts:[{text:prompt,weight:1}],cfg_scale:7,height:1024,width:1024,steps:30,samples:1})
         });
-        if(r.ok){
-          const d=await r.json();
-          return 'data:image/png;base64,'+d.artifacts[0].base64;
-        }
+        if(r.ok){const d=await r.json();return 'data:image/png;base64,'+d.artifacts[0].base64;}
       }catch(e2){}
     }
-    showToast('❌ Image nahi bani: '+e.message);
+    showToast('❌ '+e.message+' — Dobara try karo');
     return null;
   }
 }
@@ -1213,14 +1213,28 @@ function renderImageMsg(src, prompt){
   const wrap=document.getElementById('msgs');
   const div=document.createElement('div');
   div.className='mrow ai';
+  const imgId='img_'+Date.now();
   div.innerHTML='<div class="av aav" style="display:flex;align-items:center;justify-content:center">🤖</div>'
     +'<div class="mc"><div class="mb">'
-    +'<div style="font-size:12.5px;color:var(--t2);margin-bottom:8px">🎨 '+prompt+'</div>'
-    +'<img src="'+src+'" style="max-width:100%;border-radius:12px;display:block;margin-bottom:8px" />'
-    +'<a href="'+src+'" download="perryai_image.png" style="display:inline-flex;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--b);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--t2);text-decoration:none">⬇️ Download</a>'
+    +'<div style="font-size:12px;color:var(--t2);margin-bottom:8px;font-style:italic">🎨 '+prompt+'</div>'
+    +'<div id="'+imgId+'_wrap" style="position:relative;border-radius:12px;overflow:hidden;background:var(--card2);min-height:200px;display:flex;align-items:center;justify-content:center">'
+    +'<div id="'+imgId+'_sk" style="position:absolute;inset:0;background:linear-gradient(90deg,var(--card2) 25%,var(--b2) 50%,var(--card2) 75%);background-size:400px 100%;animation:sk-shimmer 1.4s ease infinite"></div>'
+    +'<img id="'+imgId+'" src="'+src+'" data-sk="'+imgId+'_sk" style="max-width:100%;border-radius:12px;display:block;opacity:0;transition:opacity .4s" onload="this.style.opacity=1;var sk=document.getElementById(this.dataset.sk);if(sk)sk.remove();" />'
+    +'</div>'
+    +'<div style="display:flex;gap:8px;margin-top:8px">'
+    +'<a href="'+src+'" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1px solid var(--b);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--t2);text-decoration:none">⬇️ Download</a>'
+    +'<button data-prompt="'+encodeURIComponent(prompt)+'" onclick="regenerateImage(this.dataset.prompt)" style="display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1px solid var(--b);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--t2);cursor:pointer;font-family:var(--font)">🔄 Dobara</button>'
+    +'</div>'
     +'</div></div>';
   wrap.appendChild(div);
   const ca=document.getElementById('chatArea');if(ca)ca.scrollTop=ca.scrollHeight;
+}
+
+async function regenerateImage(encodedPrompt){
+  const prompt=decodeURIComponent(encodedPrompt);
+  showToast('🎨 Nai image ban rahi hai...');
+  const src=await generateImage(prompt);
+  if(src)renderImageMsg(src,prompt);
 }
 
 // ════════════════════════════════════════════════════════
@@ -1306,13 +1320,12 @@ async function doDeepResearch(query){
 // ════════════════════════════════════════════════════════
 function detectIntent(msg){
   const m=msg.toLowerCase();
-  // Image generation
-  if(/image bana|photo bana|picture bana|draw|generate image|ek image|tasveer bana|create image|paint|illustration/.test(m))
+  // Image generation - more keywords
+  if(/image bana|photo bana|picture bana|tasveer bana|photo banao|image banao|draw|generate image|create image|ek image|ek photo|paint|illustration|wallpaper bana|poster bana|logo bana|bana do ek|bana ke do|kya tum photo|photo bana sakte|image generate|image de|photo de/.test(m))
     return 'image_gen';
   // Deep research
-  if(/deep research|research kar|web search|latest news|aaj ki khabar|current|2024|2025|2026|abhi kya|news|trending/.test(m))
+  if(/deep research|research kar|web search|latest news|aaj ki khabar|current news|2025|2026|abhi kya|news|trending|kya chal raha/.test(m))
     return 'research';
-  // Image analysis (if attachment present)
   return 'chat';
 }
 
@@ -2389,18 +2402,26 @@ async function sendMsg(){
     renderMsg('user',text);
     const typId=showTyping();
     generating=true;
-    // Extract prompt from message
-    const imgPrompt=text.replace(/image bana|photo bana|picture bana|generate image|ek image|tasveer bana|create image|draw|paint/gi,'').trim()||text;
+    document.getElementById('sendBtn').disabled=true;
+    showStopBtn();
+    // Extract clean prompt
+    const imgPrompt=text
+      .replace(/kya tum|kya aap|please|zaroor|bana do|bana ke do|bana sakte ho|bana sakti ho/gi,'')
+      .replace(/image bana|photo bana|picture bana|tasveer bana|generate image|create image|ek image|ek photo|draw|paint/gi,'')
+      .trim()||text;
     const imgSrc=await generateImage(imgPrompt);
     removeTyping(typId);
+    hideStopBtn();
     generating=false;
+    document.getElementById('sendBtn').disabled=false;
     if(imgSrc){
-      renderImageMsg(imgSrc, imgPrompt);
+      renderImageMsg(imgSrc,imgPrompt);
       chatMsgs.push({role:'user',content:text});
       chatMsgs.push({role:'assistant',content:'[Image generated: '+imgPrompt+']'});
       saveHistMsgs();
+      if(chatMsgs.filter(m=>m.role==='user').length===1)setTimeout(()=>autoGenerateTitle(text),500);
     } else {
-      const {id}=renderMsg('ai','❌ Image nahi ban payi. Stability AI key check karo admin panel mein.');
+      renderMsg('ai','❌ Image nahi ban payi. Dobara try karo ya prompt thoda alag karo.');
     }
     return;
   }
