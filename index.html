@@ -2441,26 +2441,18 @@ async function sendMsg(){
     const typId=showTyping();
     updateThinkLabel(typId,'Best prompt soch raha hun...');
 
-    // ── Step 2: AI generates best image prompt ──
-    let imgPrompt='';
-    try{
-      // Use direct API call for prompt generation - bypasses main system prompt
-      const avail=getAvail();
-      const prov=avail[0];
-      const aiReply=prov?await prov.call(
-        [{role:'user',content:'Create a detailed image generation prompt in English for: "'+text+'". Give only the prompt (20-30 words describing subject, style, colors, mood, lighting). No explanation, no quotes.'}],
-        'You are an expert image prompt engineer. Return ONLY the image prompt, nothing else.',
-        KEYS[prov.id]
-      ):text;
-      imgPrompt=aiReply.trim().replace(/^["\']/,'').replace(/["\'.]$/,'').trim();
-    }catch(e){
-      // Fallback: clean text se prompt
-      imgPrompt=text
-        .replace(/kya tum|kya aap|please|zaroor|bana do|bana ke do|bana sakte ho/gi,'')
-        .replace(/image bana(o)?|photo bana(o)?|picture bana(o)?|tasveer bana(o)?|generate image|create image|ek image|ek photo|draw|paint/gi,'')
-        .replace(/\s+/g,' ').trim()||'beautiful colorful digital art';
-    }
+        // ── Step 2: Build image prompt (no extra API call needed) ──
+    let imgPrompt=text
+      .replace(/kya tum|kya aap|please|zaroor|bana do|bana ke do|bana sakte ho|bana sakti ho|bana ke|bana de|mujhe|mujhko/gi,'')
+      .replace(/image bana(o)?|photo bana(o)?|picture bana(o)?|tasveer bana(o)?|generate image|create image|ek image|ek photo|draw|paint|wallpaper|poster/gi,'')
+      .replace(/\s+/g,' ').trim();
 
+    // Hindi to English keyword translation
+    const hw={'hathi':'elephant','sher':'lion','kutta':'dog','billi':'cat','ghar':'house','paani':'water','aag':'fire','pahad':'mountain','nadi':'river','jungle':'forest','raat':'night','din':'day','suraj':'sun','chand':'moon','taare':'stars','aasman':'sky','phool':'flowers','ped':'tree','barish':'rain','barf':'snow','nahate hue':'bathing','nahate':'bathing','khana khate':'eating food','sota':'sleeping','sundar':'beautiful','bada':'big','lal':'red','neela':'blue','hara':'green','peela':'yellow','safed':'white','kala':'black'};
+    let ep=imgPrompt.toLowerCase();
+    Object.keys(hw).forEach(k=>{ep=ep.split(k).join(hw[k]);});
+    if(!ep||ep.trim().length<3)ep='beautiful colorful digital art';
+    imgPrompt=ep.trim()+', highly detailed, 4k, professional quality, vibrant colors';
     // ── Step 3: Show "Image ban rahi hai" ──
     updateThinkLabel(typId,'Image generate ho rahi hai...');
 
