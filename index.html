@@ -986,7 +986,7 @@ body.light .md-table tr:hover td{background:rgba(0,0,0,.02)}
           <button class="voice-call-btn" id="voiceCallBtn" onclick="toggleVoiceCall()" title="Voice se baat karo">
             <svg id="vcIcon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
           </button>
-          <button class="send-btn" id="sendBtn" onclick="sendMsg()">
+          <button class="send-btn" id="sendBtn" onclick="handleSendBtn()">
             <svg id="sendIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
             <svg id="stopIcon" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="3" y="3" width="18" height="18" rx="3"/></svg>
           </button>
@@ -1123,9 +1123,16 @@ function reloadKeys(){
 
 let stopRequested=false;
 
+function handleSendBtn(){
+  if(generating) stopGeneration();
+  else sendMsg();
+}
+
 function stopGeneration(){
   stopRequested=true;
   hideStopBtn();
+  generating=false;
+  document.getElementById('sendBtn').disabled=false;
 }
 
 function showStopBtn(){
@@ -1133,7 +1140,7 @@ function showStopBtn(){
   const btn=document.getElementById('sendBtn');
   const sendIc=document.getElementById('sendIcon');
   const stopIc=document.getElementById('stopIcon');
-  if(btn){btn.onclick=stopGeneration;btn.classList.add('stop-mode');}
+  if(btn)btn.classList.add('stop-mode');
   if(sendIc)sendIc.style.display='none';
   if(stopIc)stopIc.style.display='block';
 }
@@ -1142,7 +1149,7 @@ function hideStopBtn(){
   const btn=document.getElementById('sendBtn');
   const sendIc=document.getElementById('sendIcon');
   const stopIc=document.getElementById('stopIcon');
-  if(btn){btn.onclick=sendMsg;btn.classList.remove('stop-mode');}
+  if(btn)btn.classList.remove('stop-mode');
   if(sendIc)sendIc.style.display='block';
   if(stopIc)stopIc.style.display='none';
 }
@@ -1172,42 +1179,65 @@ let curProvIdx = LS('pk_cur',0);
 // ════════════════════════════════════════════════════════
 // IMAGE GENERATION (Stability AI)
 // ════════════════════════════════════════════════════════
-async function generateImage(prompt){
-  showToast('🎨 Image generate ho rahi hai...');
-  const encoded=encodeURIComponent(prompt);
-  const seed=Math.floor(Math.random()*999999);
-  const url='https://image.pollinations.ai/prompt/'+encoded+'?width=1024&height=1024&seed='+seed+'&nologo=true&model=flux';
-  
-  // Wait for image to fully load before showing
-  return new Promise((resolve)=>{
+// Free image APIs — try in order
+const IMG_APIS=[
+  // 1. Pollinations flux model
+  (p,s)=>'https://image.pollinations.ai/prompt/'+encodeURIComponent(p)+'?width=1024&height=1024&seed='+s+'&nologo=true&model=flux',
+  // 2. Pollinations default  
+  (p,s)=>'https://image.pollinations.ai/prompt/'+encodeURIComponent(p)+'?width=1024&height=1024&seed='+s+'&nologo=true',
+  // 3. Pollinations small size fallback
+  (p,s)=>'https://image.pollinations.ai/prompt/'+encodeURIComponent(p)+'?width=512&height=512&seed='+s+'&nologo=true',
+];
+
+function tryLoadImg(url){
+  return new Promise((res,rej)=>{
     const img=new Image();
-    let done=false;
-    
-    img.onload=()=>{
-      if(done)return; done=true;
-      showToast('✅ Image ready!');
-      resolve(url);
-    };
-    
-    img.onerror=()=>{
-      if(done)return; done=true;
-      // Try smaller size fallback
-      const fallback='https://image.pollinations.ai/prompt/'+encoded+'?width=512&height=512&nologo=true';
-      const img2=new Image();
-      img2.onload=()=>resolve(fallback);
-      img2.onerror=()=>{showToast('❌ Image nahi bani — dobara try karo');resolve(null);};
-      img2.src=fallback;
-    };
-    
+    const t=setTimeout(()=>rej(new Error('timeout')),50000);
+    img.onload=()=>{clearTimeout(t);res(url);};
+    img.onerror=()=>{clearTimeout(t);rej(new Error('load error'));};
     img.src=url;
-    
-    // 60 second timeout
-    setTimeout(()=>{
-      if(done)return; done=true;
-      showToast('❌ Timeout — dobara try karo');
-      resolve(null);
-    }, 60000);
   });
+}
+
+async function generateImage(prompt){
+  const seed=Math.floor(Math.random()*999999);
+  showToast('🎨 Image ban rahi hai...');
+  
+  for(let i=0;i<IMG_APIS.length;i++){
+    const url=IMG_APIS[i](prompt,seed);
+    showToast('🎨 Image generate ho rahi hai... ('+(i===0?'HD':'SD')+')');
+    try{
+      const result=await tryLoadImg(url);
+      showToast('✅ Image ready!');
+      return result;
+    }catch(e){
+      if(i<IMG_APIS.length-1){
+        showToast('⏳ Try '+(i+2)+'/'+IMG_APIS.length+'...');
+        continue;
+      }
+    }
+  }
+  
+  // Last resort: stability AI if key available
+  reloadKeys();
+  if(KEYS.stability){
+    try{
+      showToast('🎨 Stability AI se try...');
+      const r=await fetch('https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+KEYS.stability,'Accept':'application/json'},
+        body:JSON.stringify({text_prompts:[{text:prompt,weight:1}],cfg_scale:7,height:1024,width:1024,steps:30,samples:1})
+      });
+      if(r.ok){
+        const d=await r.json();
+        showToast('✅ Image ready!');
+        return 'data:image/png;base64,'+d.artifacts[0].base64;
+      }
+    }catch(e2){}
+  }
+  
+  showToast('❌ Image nahi bani. Network check karo ya dobara try karo.');
+  return null;
 }
 
 function renderImageMsg(src, prompt){
@@ -1491,6 +1521,7 @@ async function readSSEStream(response, onChunk, type='openai'){
   let full='';
   let buf='';
   while(true){
+    if(stopRequested){try{reader.cancel();}catch(e){}break;}
     const {done,value}=await reader.read();
     if(done)break;
     buf+=decoder.decode(value,{stream:true});
@@ -1521,17 +1552,21 @@ function getSystemPrompt(){
   const userInfo = u?`\n\nUser ka naam: ${u.name||u.username}. Use familiar, warm tone.`:'';
   return `Tum PerryAI ho — India ka best personal AI assistant. Tum ek smart, warm, helpful AI ho jo India ke users ke liye kaam karta hai.
 
-CAPABILITIES: Market analysis (NSE/BSE/crypto), investment advice (India-focused), writing improvement, social media posts (Instagram/Twitter/LinkedIn), email drafting, coding help, translations (Hindi↔English), general knowledge, motivational content, creative writing, scripts, reels, aur sab kuch jo user maange.
+CAPABILITIES: Market analysis (NSE/BSE/crypto), investment advice (India-focused), writing improvement, social media posts, email drafting, coding help, translations (Hindi↔English), general knowledge, motivational content, creative writing, scripts, reels, aur sab kuch jo user maange.
 
 LANGUAGE RULES: Hamesha user ki language mein jawab do — Hindi mein poochha? Hindi mein jawab. Hinglish? Hinglish. English? English. Mix? Mix.
 
 FORMATTING: Use **bold** for important points. Use bullet points when listing. For code, ALWAYS use fenced code blocks with the language name. Keep responses concise but complete. Be warm and friendly like a knowledgeable friend.
 
-ANTI-REPETITION RULES (BAHUT ZAROORI):
-- Agar user dobara similar cheez maange (jaise "koi aur script likho", "ek aur do", "different one"), toh BILKUL NAYA content do
-- KABHI bhi pichla jawab copy mat karo — style, topic, angle, tone sab badlo
-- Creative requests mein har baar genuinely different approach lo
-- User ne "aur" ya "different" kaha = guaranteed fresh content, zero overlap with previous
+IMAGE RULES (BAHUT ZAROORI):
+- Agar user image/photo/picture maange, toh KABHI bhi text mein image describe mat karo
+- KABHI mat likho "Image:", "Image Description:", "Ek sundar...", ya koi bhi text description
+- Image automatically generate hogi — tum bas normal conversation karo
+- Agar image ban gayi toh simply "Image ban gayi! Kaisi lagi?" jaise kaho
+
+ANTI-REPETITION RULES:
+- Agar user dobara similar cheez maange toh BILKUL NAYA content do
+- KABHI bhi pichla jawab copy mat karo
 
 TRAINING: Users ke previous conversations se seekho aur unhe better serve karo.${memStr}${userInfo}`;
 }
@@ -2409,7 +2444,14 @@ async function sendMsg(){
     // ── Step 2: AI generates best image prompt ──
     let imgPrompt='';
     try{
-      const aiReply=await smartCall([{role:'user',content:'User ki request: "'+text+'". Is request ke liye ek perfect image generation prompt banao English mein. Prompt detailed hona chahiye (20-30 words) - colors, style, mood, subject sab describe karo. Sirf prompt do, kuch aur nahi.'}]);
+      // Use direct API call for prompt generation - bypasses main system prompt
+      const avail=getAvail();
+      const prov=avail[0];
+      const aiReply=prov?await prov.call(
+        [{role:'user',content:'Create a detailed image generation prompt in English for: "'+text+'". Give only the prompt (20-30 words describing subject, style, colors, mood, lighting). No explanation, no quotes.'}],
+        'You are an expert image prompt engineer. Return ONLY the image prompt, nothing else.',
+        KEYS[prov.id]
+      ):text;
       imgPrompt=aiReply.trim().replace(/^["\']/,'').replace(/["\'.]$/,'').trim();
     }catch(e){
       // Fallback: clean text se prompt
