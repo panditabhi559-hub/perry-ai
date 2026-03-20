@@ -3820,6 +3820,36 @@ function dismissPWA(){
 
 window.addEventListener('appinstalled',()=>showToast('PerryAI install hua!'));
 
+
+function renderImageMsg(src, prompt){
+  const wrap=document.getElementById('msgs');
+  const div=document.createElement('div');
+  div.className='mrow ai';
+  const imgId='img_'+Date.now();
+  div.innerHTML='<div class="av aav" style="background:none;padding:0;overflow:hidden"><img src="'+PERRY_LOGO+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/></div>'
+    +'<div class="mc"><div class="mb">'
+    +'<div style="font-size:11px;color:var(--t3);margin-bottom:8px;padding:6px 10px;background:var(--card2);border-radius:8px;border-left:3px solid var(--ac)">🎨 '+prompt+'</div>'
+    +'<div id="'+imgId+'_st" style="display:flex;align-items:center;gap:8px;padding:12px;background:var(--card2);border-radius:10px;margin-bottom:8px;font-size:13px;color:var(--t2)">'
+    +'<div style="width:16px;height:16px;border:2px solid var(--ac);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></div>'
+    +'Image load ho rahi hai... (20-40 sec)</div>'
+    +'<img id="'+imgId+'" src="'+src+'" data-st="'+imgId+'_st" style="max-width:100%;width:100%;border-radius:12px;display:none;margin-bottom:8px" '
+    +'onload="this.style.display=\'block\';var s=document.getElementById(this.dataset.st);if(s)s.remove();" '
+    +'onerror="var s=document.getElementById(this.dataset.st);if(s)s.textContent=\'❌ Load failed. Dobara try karo.\'" />'
+    +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
+    +'<a href="'+src+'" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1px solid var(--b);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--t2);text-decoration:none">⬇️ Download</a>'
+    +'<button data-prompt="'+encodeURIComponent(prompt)+'" onclick="regenerateImage(this.dataset.prompt)" style="display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1px solid var(--b);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--t2);cursor:pointer;font-family:var(--font)">🔄 Dobara</button>'
+    +'</div></div></div>';
+  wrap.appendChild(div);
+  const ca=document.getElementById('chatArea');if(ca)ca.scrollTop=ca.scrollHeight;
+}
+
+async function regenerateImage(encodedPrompt){
+  const prompt=decodeURIComponent(encodedPrompt);
+  showToast('🎨 Nai image ban rahi hai...');
+  const src=await generateImage(prompt);
+  if(src)renderImageMsg(src,prompt);
+}
+
 </script>
 <!-- Mobile API Keys Setup Modal -->
 <div id="mobileSetupModal" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,.85);align-items:center;justify-content:center;backdrop-filter:blur(4px)">
@@ -3920,28 +3950,4 @@ window.addEventListener('appinstalled',()=>showToast('PerryAI install hua!'));
 <div class="voice-status" id="voiceStatus"></div>
 
 </body>
-</htmlfunction renderImageMsg(src, prompt){
-  const wrap=document.getElementById('msgs');
-  const div=document.createElement('div');
-  div.className='mrow ai';
-  const imgId='img_'+Date.now();
-  
-  div.innerHTML='<div class="av aav" style="background:none;padding:0;overflow:hidden"><img src="'+PERRY_LOGO+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/></div>'
-    +'<div class="mc"><div class="mb">'
-    +'<div style="font-size:11px;color:var(--t3);margin-bottom:8px;padding:6px 10px;background:var(--card2);border-radius:8px;border-left:3px solid var(--ac)">🎨 '+prompt+'</div>'
-    +'<div id="'+imgId+'_status" style="display:flex;align-items:center;gap:8px;padding:12px;background:var(--card2);border-radius:10px;margin-bottom:8px;font-size:13px;color:var(--t2)">'
-    +'<div style="width:16px;height:16px;border:2px solid var(--ac);border-top-color:transparent;border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0"></div>'
-    +'Image load ho rahi hai... (20-40 sec)</div>'
-    +'<img id="'+imgId+'" src="'+src+'" '
-    +'style="max-width:100%;width:100%;border-radius:12px;display:none;margin-bottom:8px" '
-    +'onload="this.style.display='block';var s=document.getElementById(''+imgId+'_status');if(s)s.remove();" '
-    +'onerror="var s=document.getElementById(''+imgId+'_status');if(s)s.innerHTML='❌ Image load nahi hui. Dobara try karo.';this.remove();" />'
-    +'<div style="display:flex;gap:8px;flex-wrap:wrap">'
-    +'<a href="'+src+'" target="_blank" style="display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1px solid var(--b);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--t2);text-decoration:none">⬇️ Download</a>'
-    +'<button data-prompt="'+encodeURIComponent(prompt)+'" onclick="regenerateImage(this.dataset.prompt)" style="display:inline-flex;align-items:center;gap:5px;background:var(--card2);border:1px solid var(--b);border-radius:8px;padding:6px 12px;font-size:12px;color:var(--t2);cursor:pointer;font-family:var(--font)">🔄 Dobara</button>'
-    +'</div>'
-    +'</div></div>';
-  
-  wrap.appendChild(div);
-  const ca=document.getElementById('chatArea');if(ca)ca.scrollTop=ca.scrollHeight;
-}>
+</html>
