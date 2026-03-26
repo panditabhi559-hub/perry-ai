@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>PerryAI | India's Smartest AI Assistant</title>
+    <meta name="theme-color" content="#0b0c0d">
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PerryAI">
+    <link rel="apple-touch-icon" href="img/icon-192.png">
+
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- External Dependencies -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+    <!-- Register Service Worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js');
+        });
+      }
+    </script>
+
+    <!-- Firebase (Loading as modules later in script) -->
+</head>
+<body class="dark">
+
+    <div class="sb-ov" id="sbOv"></div>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- USER LOGIN SCREEN -->
+    <!-- ══════════════════════════════════════ -->
+    <div class="screen active" id="userLogin">
+        <div class="ul-wrap">
+            <div class="ul-logo">
+                <div class="ul-logo-ic">🤖</div>
+                <div class="ul-logo-txt">Perry<span>AI</span></div>
+            </div>
+            <div class="ul-title">Welcome back</div>
+            <div class="ul-sub">Login karke Perry se baat karo — India ka smartest AI!</div>
+            <div class="ul-err" id="ul-err"></div>
+            <div id="gBtnWrap"></div>
+            
+            <div class="divider">
+                <div class="divider-line"></div>
+                <div class="divider-txt">ya username se</div>
+                <div class="divider-line"></div>
+            </div>
+
+            <div id="ulForm">
+                <input class="inp" id="ul-user" placeholder="Username" autocomplete="username">
+                <input class="inp" id="ul-pass" placeholder="Password" type="password">
+                <button class="btn-main" id="loginBtn">Login karo →</button>
+                <div class="link-txt">Pehli baar? <span id="showRegLink">Free account banao</span></div>
+            </div>
+
+            <div id="ulReg" style="display:none">
+                <input class="inp" id="ur-name" placeholder="Apna naam">
+                <input class="inp" id="ur-user" placeholder="Username chuno">
+                <input class="inp" id="ur-pass" placeholder="Password (4+ characters)" type="password">
+                <button class="btn-main" id="regBtn">Account banao →</button>
+                <div class="link-txt">Pehle se account hai? <span id="showLoginLink">Login karo</span></div>
+            </div>
+            <div class="login-foot">PerryAI Labs • Secure & Private</div>
+        </div>
+        <div class="admin-link" id="adminLoginLink">🔐 Admin</div>
+    </div>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- USER APP -->
+    <!-- ══════════════════════════════════════ -->
+    <div class="screen" id="userApp">
+        <!-- Sidebar -->
+        <div class="sb" id="sb">
+            <div class="sb-top">
+                <div class="sb-logo">
+                    <div class="sb-logo-ic">🤖</div>
+                    <div class="sb-logo-txt">Perry<span>AI</span></div>
+                </div>
+                <button class="ib" id="closeSbBtn">✕</button>
+            </div>
+            <button class="new-chat-btn" id="newChatBtn">✏️ &nbsp;New Chat</button>
+            <div style="padding:0 8px 6px">
+                <input class="search-inp" id="histSearch" type="text" placeholder="🔍 Chats dhundho...">
+            </div>
+            <div class="sb-lbl">Recents</div>
+            <div class="hist" id="hist"></div>
+            
+            <div class="sb-bottom">
+                <div class="sb-action" id="logoutBtn">⏏️ &nbsp;Logout</div>
+            </div>
+        </div>
+
+        <!-- Main -->
+        <div class="main">
+            <div class="top-bar">
+                <div class="top-bar-l">
+                    <button class="ib" id="openSbBtn">☰</button>
+                    <div style="font-size:15px;font-weight:700">Perry<span style="color:var(--ac)">AI</span></div>
+                </div>
+                <div class="top-bar-r">
+                    <button class="theme-btn" id="themeToggleBtn">🌙</button>
+                    <div class="p-av" id="userAvatar">U</div>
+                </div>
+            </div>
+
+            <div class="chat-area" id="chatArea">
+                <div class="welcome" id="welcome">
+                    <div class="w-ic">🤖</div>
+                    <h1 class="w-title">Main Perry hun.</h1>
+                    <p class="w-sub">Aapka personal AI assistant. Aaj main aapki kaise madad kar sakta hun?</p>
+                </div>
+                <div class="msgs" id="msgs"></div>
+            </div>
+
+            <div class="inp-area">
+                <div class="inp-box">
+                    <textarea class="chat-inp" id="chatInp" placeholder="Perry se kuch pucho..." rows="1"></textarea>
+                    <div class="inp-btns">
+                        <button class="ibt" id="micBtn">🎤</button>
+                        <button class="send-btn" id="sendBtn" disabled>
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast & Voice Status -->
+    <div class="toast" id="toast"></div>
+    <div class="voice-status" id="voiceStatus"></div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
