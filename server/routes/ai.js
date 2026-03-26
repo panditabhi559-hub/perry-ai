@@ -10,10 +10,12 @@ const PROVIDERS = {
     deepseek: "https://api.deepseek.com/chat/completions"
 };
 
+const { getApiKey } = require('../services/keys');
+
 // Generic Handle for common OpenAI-style APIs (OpenRouter, Groq, DeepSeek)
 const openaiProxy = async (req, res, provider) => {
     const { messages, model, stream } = req.body;
-    const apiKey = process.env[`${provider.toUpperCase()}_API_KEY`];
+    const apiKey = await getApiKey(`${provider.toUpperCase()}_API_KEY`);
 
     if (!apiKey) {
         return res.status(401).json({ error: `${provider} API Key not configured on server.` });
@@ -57,7 +59,7 @@ router.post('/chat', async (req, res) => {
 // Special handler for Gemini
 const handleGemini = async (req, res) => {
     const { messages, stream } = req.body;
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = await getApiKey('GEMINI_API_KEY');
 
     if (!apiKey) {
         return res.status(401).json({ error: "Gemini API Key not configured on server." });

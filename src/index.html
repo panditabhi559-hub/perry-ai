@@ -39,7 +39,7 @@
     <div class="screen active" id="userLogin">
         <div class="ul-wrap">
             <div class="ul-logo">
-                <div class="ul-logo-ic">🤖</div>
+                <img src="img/logo.png" alt="PerryAI" style="width:64px;height:64px;border-radius:12px;margin-bottom:12px">
                 <div class="ul-logo-txt">Perry<span>AI</span></div>
             </div>
             <div class="ul-title">Welcome back</div>
@@ -69,7 +69,41 @@
             </div>
             <div class="login-foot">PerryAI Labs • Secure & Private</div>
         </div>
-        <div class="admin-link" id="adminLoginLink">🔐 Admin</div>
+    </div>
+
+    <!-- ══════════════════════════════════════ -->
+    <!-- ADMIN APP SCREEN -->
+    <!-- ══════════════════════════════════════ -->
+    <div class="screen" id="adminApp">
+        <div class="top-bar">
+            <div class="top-bar-l">
+                <button class="ib" onclick="showScreen('userLogin')">⬅️</button>
+                <div style="font-size:17px;font-weight:700">Admin<span>Control</span></div>
+            </div>
+        </div>
+        <div class="admin-wrap" style="padding:20px; max-width:800px; margin:0 auto">
+            <h3>🔑 Dynamic API Keys Management</h3>
+            <p style="color:#888;font-size:14px">Yahan se aap bina Vercel deploy kiye models ki keys change kar sakte hain.</p>
+            
+            <div class="admin-card" style="background:#1a1b1f; padding:20px; border-radius:12px; border:1px solid #2a2c31; margin-bottom:20px">
+                <label style="display:block;margin-bottom:8px">OpenRouter Key</label>
+                <input class="inp" id="adm-orkey" type="password" placeholder="sk-or-v1-...">
+                
+                <label style="display:block;margin-bottom:8px;margin-top:15px">Gemini API Key</label>
+                <input class="inp" id="adm-gemkey" type="password" placeholder="AIzaSy...">
+
+                <label style="display:block;margin-bottom:8px;margin-top:15px">ElevenLabs Key (Voice)</label>
+                <input class="inp" id="adm-evlkey" type="password" placeholder="ElevenLabs Key...">
+
+                <button class="btn-main" id="saveKeysBtn" style="margin-top:20px">Save Changes Now 💾</button>
+            </div>
+
+            <h3>📊 Platform Stats</h3>
+            <div id="adminStats" style="display:grid; grid-template-columns:1fr 1fr; gap:15px">
+                <div class="stat-box" style="background:#1a1b1f; padding:15px; border-radius:12px">Users: <span id="totalUsers">0</span></div>
+                <div class="stat-box" style="background:#1a1b1f; padding:15px; border-radius:12px">Total Chats: <span id="totalChats">0</span></div>
+            </div>
+        </div>
     </div>
 
     <!-- ══════════════════════════════════════ -->

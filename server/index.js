@@ -45,11 +45,13 @@ const authRoutes = require('./routes/auth');
 const chatRoutes = require('./routes/chat');
 const imageRoutes = require('./routes/image');
 const voiceRoutes = require('./routes/voice');
+const adminRoutes = require('./routes/admin');
 app.use('/api/ai', aiRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/image', imageRoutes);
 app.use('/api/voice', voiceRoutes);
+app.use('/api/admin', adminRoutes);
 
 // start server
 app.listen(PORT, () => {

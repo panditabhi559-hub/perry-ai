@@ -2,9 +2,11 @@ const express = require('express');
 const axios = require('axios');
 const router = express.Router();
 
+const { getApiKey } = require('../services/keys');
+
 router.post('/speak', async (req, res) => {
     const { text, voiceId = '21m00Tcm4lPqW29OL023' } = req.body; // Default voice ID
-    const apiKey = process.env.ELEVENLABS_API_KEY;
+    const apiKey = await getApiKey('ELEVENLABS_API_KEY');
 
     if (!apiKey) {
         return res.status(401).json({ error: 'ElevenLabs API Key not configured' });
