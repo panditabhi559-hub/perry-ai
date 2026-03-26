@@ -1,4 +1,4 @@
-const BACKEND_URL = 'http://localhost:3000/api';
+const BACKEND_URL = '/api';
 
 export async function callAI(messages, model = 'google/gemini-2.0-flash-exp:free', provider = 'openrouter') {
     try {
